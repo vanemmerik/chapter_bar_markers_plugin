@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="cuepoints.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="//www.brightcove.com/favicon.svg">
+    <title>Brightcove - Cue Points Player</title>
+</head>
+<body>
+<div style="max-width: 960px; margin: auto; padding-top: 40px;">
+    <style>
+        video-js.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
+            padding-top: 56.25%;
+            }
+    </style>
+    <video-js
+        id="myPlayer" 
+        data-account="5380177774001" 
+        data-player="default"
+        data-embed="default"
+        controls=""
+        playsinline
+        data-video-id="1760529707981270117"
+        data-playlist-id=""
+        data-application-id="" 
+        class="vjs-fluid">
+    </video-js>
+</div>
+<script src="//players.brightcove.net/5380177774001/default_default/index.min.js"></script>
+<script src="cuepoints.js"></script>
+<script>
+    videojs.getPlayer('myPlayer').ready(function() {
+    var myPlayer = this;
+        options = {"cue_marker_color": "#03fcf4"};
+    myPlayer.cuePointMarkersPlugin(options);
+    });
+</script>
+</body>
+</html>
