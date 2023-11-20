@@ -574,7 +574,7 @@
             data-embed="default" 
             controls=""
             playsinline
-            data-video-id="1775823197178862965" 
+            data-video-id="1775823197178862965"
             data-playlist-id=""
             data-application-id="" 
             class="vjs-fluid">
@@ -901,8 +901,11 @@
 
     const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
       const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
+            chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
             chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
-            chapter_right_arrow_button = document.querySelector('#chapter_right_arrow');
+            chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
+            chapter_container = document.querySelector('#vjs-chapter-container'),
+            chapter_col_container = document.querySelector('#chapter_col_container');
       chapterContainer = document.querySelector('#chapter_col_container');
       for (let i = 0; i < arr.length; i++) {
         chapterContainer.innerHTML += `
@@ -917,7 +920,13 @@
           </div>
         `;
       }
-
+      if (chapter_col_container.scrollWidth <= chapter_container.clientWidth) {
+       chapter_arrow_container.forEach(function(element){
+        element.style.display = 'none';
+       })
+      }
+      console.log(chapter_container.clientWidth);
+      console.log(chapter_col_container.scrollWidth);
     }
     const chapterTime = (time) => {
       myPlayer.player.currentTime(time);
