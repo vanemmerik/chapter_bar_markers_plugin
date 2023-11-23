@@ -814,6 +814,7 @@
         cueTip.appendChild(cueTipData);
     }
 
+    // Create the chapter elements and add them to DOM
     const chapterThumbContainer = () => {
       let chapterContainer = document.createElement('div');
       chapterContainer.id = 'vjs-chapter-container';
@@ -895,19 +896,24 @@
         });
     }
 
+    // Extract media Bolt ID from the URL path
     const getBoltId = (url) => {
       const path = new URL(url).pathname;
       const segments = path.split('/').filter(Boolean);
       return segments.length >= 5 ? segments[3] : null;
     };
 
+    // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
     const convertTime = (seconds) => {
       seconds = Math.round(seconds);
-      let minutes = Math.floor(seconds / 60),
+      let hours = Math.floor(seconds / 3600),
+          minutes = Math.floor(seconds / 60),
           remainderSeconds = seconds % 60;
-      return (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+      if (seconds >= 3600 ) return (hours < 10 ? '0' + hours : hours) + ":" + (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+      if (seconds < 3600 ) return (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
     }
 
+    // Generate the chapter thumbnails based on data in the filtered array
     const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
       const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
             chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
@@ -917,6 +923,7 @@
             chapter_col_container = document.querySelector('#chapter_col_container'),
             chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
             chapter_col = document.querySelectorAll('.chapter_col');
+      // Loop through and build array
       for (let i = 0; i < arr.length; i++) {
         chapter_col_wrapper.innerHTML += `
           <div class="chapter_col">
@@ -930,6 +937,7 @@
           </div>
         `;
       }
+      // Add event listener to the arrpow buttons
       chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow ('left'));
       chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow ('right'));
       if (arr.length <= 5) {
@@ -940,16 +948,19 @@
       onElementAdded(chapter_col_wrapper);
     }
 
+    // Add the observer to watch carousel wrapper as page loads to updaate element width for scroll
     function onElementAdded(chapter_col_wrapper) {
       if (chapter_col_wrapper) {
         resizeObserver.observe(chapter_col_wrapper);
       }
     }
 
+    // Callback to check mutation of the chapter wrapper element
     const resizeObserverCallback = entries => {
       checkCarouselOverflow();
     };
 
+    // Get boundaries of chapter window (parent) and the wrapper (child) calculate offset and display controls
     const resizeObserver = new ResizeObserver(resizeObserverCallback);
     let currentPosition = 0;
     const checkCarouselOverflow = (direction) => {
@@ -958,16 +969,17 @@
             chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
             chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
             chapter_col_count = document.querySelectorAll('.chapter_col').length,
+            // Get number of elements in the carousel and divide that by the widh - added multiplier to create greater increment
             carousel_shift = Number(c.offsetWidth/chapter_col_count) * 5,
             maxTranslateLeft = 0,
             maxTranslateRight = -(c.offsetWidth - p.offsetWidth);
-
+      // Display buttons based on boundaries
       const buttonVisibility = () => {
         chapter_left_arrow_button.style.display = currentPosition < maxTranslateLeft ? 'block' : 'none';
         chapter_right_arrow_button.style.display = currentPosition > maxTranslateRight ? 'block' : 'none';
         // resizeObserver.unobserve(c);
       }
-
+      // Move the chapter thumbnails based on the calulated thumbnail width
       const moveEl = () => {
         if (direction === 'right') {
             currentPosition = Math.max(currentPosition - carousel_shift, maxTranslateRight);
@@ -976,11 +988,12 @@
         }
         c.style.transform = `translateX(${currentPosition}px)`;
       }
-
+      // Call the functions to move the elements (chapter wrapper) and diplay the appropriate buttons
       moveEl();
       buttonVisibility();
     }
 
+    // Call the point in the video and play
     const chapterTime = (time) => {
       myPlayer.player.currentTime(time);
       myPlayer.player.play();
