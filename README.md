@@ -1,4 +1,4 @@
-# Brightcove - cue point markers plugin
+# Brightcove - Chapter thumbnails & cuepoint markers plugin
 
 A Brightcove player plugin that adds cue point markers and associated metadata dynamically to the player progress bar.
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
