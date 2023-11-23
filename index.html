@@ -445,7 +445,13 @@
 
         #chapter_col_container{
           display: flex;
-          overflow-x: scroll;
+          overflow-x: hidden;
+        }
+
+        #chapter_col_wrapper{
+          display: flex;
+          position: relative;
+          transition: transform 0.5s ease-in-out;
         }
 
         #chapter_title{
@@ -508,6 +514,7 @@
 
         .chapter_col{
           margin: 12px 6px;
+          width: min-content;
         }
 
         .chapter_col:nth-child(1){
@@ -574,7 +581,7 @@
             data-embed="default" 
             controls=""
             playsinline
-            data-video-id="1775823197178862965"
+            data-video-id="1765369433160630106"
             data-playlist-id=""
             data-application-id="" 
             class="vjs-fluid">
@@ -831,7 +838,9 @@
         </div>
         <div id="chapter_left_arrow_button"></div>
       </div>
-      <div id="chapter_col_container"></div>
+      <div id="chapter_col_container">
+        <div id="chapter_col_wrapper"></div>
+      </div>
       <div id="chapter_right_arrow_container" class="chapter_arrow_container">
         <div id="chapter_right_arrow" class="chapter_arrow">
           <div id="chapter_chevron_right" class="chapter_arrow_chevron">
@@ -905,10 +914,11 @@
             chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
             chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
             chapter_container = document.querySelector('#vjs-chapter-container'),
-            chapter_col_container = document.querySelector('#chapter_col_container');
-      chapterContainer = document.querySelector('#chapter_col_container');
+            chapter_col_container = document.querySelector('#chapter_col_container'),
+            chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
+            chapter_col = document.querySelectorAll('.chapter_col');
       for (let i = 0; i < arr.length; i++) {
-        chapterContainer.innerHTML += `
+        chapter_col_wrapper.innerHTML += `
           <div class="chapter_col">
             <div class="chapter_anchor" onclick="chapterTime(${arr[i].time})">
               <img class="chapter_thumbnail" src="${thumbURL+arr[i].time}s/match/image.jpg">
@@ -920,14 +930,57 @@
           </div>
         `;
       }
-      if (chapter_col_container.scrollWidth <= chapter_container.clientWidth) {
+      chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow ('left'));
+      chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow ('right'));
+      if (arr.length <= 5) {
        chapter_arrow_container.forEach(function(element){
         element.style.display = 'none';
        })
       }
-      console.log(chapter_container.clientWidth);
-      console.log(chapter_col_container.scrollWidth);
+      onElementAdded(chapter_col_wrapper);
     }
+
+    function onElementAdded(chapter_col_wrapper) {
+      if (chapter_col_wrapper) {
+        resizeObserver.observe(chapter_col_wrapper);
+      }
+    }
+
+    const resizeObserverCallback = entries => {
+      checkCarouselOverflow();
+    };
+
+    const resizeObserver = new ResizeObserver(resizeObserverCallback);
+    let currentPosition = 0;
+    const checkCarouselOverflow = (direction) => {
+      const p = document.querySelector('#chapter_col_container'),
+            c = document.querySelector('#chapter_col_wrapper'),
+            chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
+            chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
+            chapter_col_count = document.querySelectorAll('.chapter_col').length,
+            carousel_shift = Number(c.offsetWidth/chapter_col_count) * 5,
+            maxTranslateLeft = 0,
+            maxTranslateRight = -(c.offsetWidth - p.offsetWidth);
+
+      const buttonVisibility = () => {
+        chapter_left_arrow_button.style.display = currentPosition < maxTranslateLeft ? 'block' : 'none';
+        chapter_right_arrow_button.style.display = currentPosition > maxTranslateRight ? 'block' : 'none';
+        // resizeObserver.unobserve(c);
+      }
+
+      const moveEl = () => {
+        if (direction === 'right') {
+            currentPosition = Math.max(currentPosition - carousel_shift, maxTranslateRight);
+        } else if (direction === 'left') {
+            currentPosition = Math.min(currentPosition + carousel_shift, 0);
+        }
+        c.style.transform = `translateX(${currentPosition}px)`;
+      }
+
+      moveEl();
+      buttonVisibility();
+    }
+
     const chapterTime = (time) => {
       myPlayer.player.currentTime(time);
       myPlayer.player.play();
