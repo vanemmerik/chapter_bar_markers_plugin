@@ -1,9 +1,9 @@
-videojs.registerPlugin('cuePointMarkersPlugin', function(options) {
+videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     var player = this,
-    imgRefBase_URL = `https://cf-images.us-east-1.prod.boltdns.net/v1/jit/`,
-    pub_id = player.bcinfo.accountId,
-    thumbnail_dimensions = '144x81';
-    player.on('loadedmetadata', function() {
+        imgRefBase_URL = `https://cf-images.us-east-1.prod.boltdns.net/v1/jit/`,
+        pub_id = player.bcinfo.accountId,
+        thumbnail_dimensions = '144x81';
+    player.on('loadedmetadata', function () {
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
@@ -15,7 +15,7 @@ videojs.registerPlugin('cuePointMarkersPlugin', function(options) {
             // Define video ID for playlist player management
             videoId = player.mediainfo.id;
         // Add existing cue point metadata to the cue points array
-        for (let i = 0; i < player.mediainfo.cuePoints.length; i++){
+        for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
             cuePointsArr.push(player.mediainfo.cuePoints[i]);
         }
         // Check for chapters in the longDescription metadata field, sort and merge
@@ -25,25 +25,25 @@ videojs.registerPlugin('cuePointMarkersPlugin', function(options) {
         // Remove duplicates based on time and replace
         purgedCueArr = dedupeArr(filteredCueArr);
         // Assign endTime to cue points in sorted array
-        assignCueEndTime(purgedCueArr,videoDuration);
+        assignCueEndTime(purgedCueArr, videoDuration);
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
-        if (purgedCueArr.length != 0) chapterThumbContainer(), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster),purgedCueArr, thumbnail_dimensions);
+        if (purgedCueArr.length != 0) chapterThumbContainer(), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, thumbnail_dimensions);
         // If playlist player/playlist is present - clear UI for new playlist item
-        if (player.playlistUi !== undefined) player.on('playlistitem', function(){rmCueEl()})
+        if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
     })
 });
 
 const xtractMatch = (string, arr, videoDuration, videoId) => {
-    if (string === null) return(arrSort(arr));
+    if (string === null) return (arrSort(arr));
     // Match time formats M:SS, MM:SS, HH:MM:SS, H:MM:SS
     let tRex = new RegExp(/(^(?:[01]\d|2[0-3]|[0-59]):[0-5]\d:[0-5]\d)|(^(?:[0-5]\d|2[123]|[0-59]):[0-5]\d)/gm),
         // Match whole line that begins with 00: Lines with time format not at the beginning are ignored
         dRex = new RegExp(/^.*?(^[0-5][0-9]:|^[0-59]:).*$/gm),
         chaptrTime = string.match(tRex),
         chaptrName = string.match(dRex);
-        // No found chapters - sort the array as it is and skip adding any further cue information
-    if (chaptrTime === null) return(arrSort(arr));
+    // No found chapters - sort the array as it is and skip adding any further cue information
+    if (chaptrTime === null) return (arrSort(arr));
     for (let i = 0; i < chaptrTime.length; i++) {
         let time = chaptrTime[i].split(':'),
             description = chaptrName[i].slice(chaptrTime[i].length),
@@ -71,13 +71,13 @@ const stringTidy = (str) => {
     str = str.replace(/([.,\/;:*{}=\-_~()<>{}+])/g, '');
     // Remove whitespace form either end of the string
     str = str.trim();
-    return(str);
+    return (str);
 }
 
 const timeConversion = (arr, time, idNum, seconds, description, duration, videoId) => {
     // Check for words in description if none set fields to blank
     if (description.match(/\b[^\d\W]+\b/g) === null) description = '';
-    if (time.length === 2){
+    if (time.length === 2) {
         // Convert MM:SS to seconds
         seconds = (Number.parseFloat(time[0]) * 60 + Number.parseFloat(time[1]));
         // If chapter is longer than the video skip
@@ -93,7 +93,7 @@ const timeConversion = (arr, time, idNum, seconds, description, duration, videoI
             video_id: videoId
         });
     }
-    if (time.length === 3){
+    if (time.length === 3) {
         // Convert HH:MM:SS to seconds
         seconds = (Number.parseFloat(time[0]) * 3600 + Number.parseFloat(time[1]) * 60 + Number.parseFloat(time[2]));
         // If chapter is longer than the video skip
@@ -112,12 +112,12 @@ const timeConversion = (arr, time, idNum, seconds, description, duration, videoI
 }
 
 // Filter array through map - remove duplicates
-const dedupeArr = (arr) => { 
+const dedupeArr = (arr) => {
     let mapObj = new Map()
     arr.forEach(v => {
         let prevValue = mapObj.get(v.time)
-        if(!prevValue){
-            mapObj.set(v.time, v)   
+        if (!prevValue) {
+            mapObj.set(v.time, v)
         }
     })
     return [...mapObj.values()];
@@ -129,7 +129,7 @@ const assignCueEndTime = (arr, duration) => {
     arrSort(arr);
     let v = 1;
     for (let i = 0; i < arr.length; i++) {
-        if (v <= arr.length - 1)arr[i].endTime = arr[v].time;
+        if (v <= arr.length - 1) arr[i].endTime = arr[v].time;
         // If last object in array set end time to video duration
         if (v === arr.length) arr[i].endTime = duration;
         v++;
@@ -185,10 +185,10 @@ const createCueInfoEl = () => {
 
 // Create the chapter elements and add them to DOM
 const chapterThumbContainer = () => {
-  let chapterContainer = document.createElement('div');
-  chapterContainer.id = 'vjs-chapter-container';
-  document.getElementsByTagName('video-js')[0].style.overflow = "visible";
-  chapterContainer.innerHTML = `
+    let chapterContainer = document.createElement('div');
+    chapterContainer.id = 'vjs-chapter-container';
+    document.getElementsByTagName('video-js')[0].style.overflow = "visible";
+    chapterContainer.innerHTML = `
   <div id="chapter_title_container">
     <h3 id="chapter_title">Chapters</h3>
   </div>
@@ -228,7 +228,7 @@ const chapterThumbContainer = () => {
     <div id="chapter_right_arrow_button"></div>
   </div>
   `
-  document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
+    document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
 }
 
 // Control mouse interaction with the cue markers - Initiated on hover state
@@ -242,17 +242,17 @@ const setCueInfo = (e, arr) => {
     cueTipData.innerHTML = `${arr[i].name}`;
     cueTip.style.display = null;
     // Display cue tool tip on left or right of marker on hover based on position
-    if (cueMarker.offsetLeft > cueHolder / 2){
+    if (cueMarker.offsetLeft > cueHolder / 2) {
         cueTipData.classList.remove('vjs-cue-data-right');
         cueTipData.classList.add('vjs-cue-data-left');
         cueTip.style.left = null;
-        cueTip.style.right = cueHolder - cueMarker.offsetLeft +20 + 'px';
+        cueTip.style.right = cueHolder - cueMarker.offsetLeft + 20 + 'px';
     } else {
         if (arr[i].time === 0) cueMarker.classList.add('initial-marker');
         cueTipData.classList.remove('vjs-cue-data-left');
         cueTipData.classList.add('vjs-cue-data-right');
         cueTip.style.right = null;
-        cueTip.style.left = cueMarker.offsetLeft +20 + 'px';
+        cueTip.style.left = cueMarker.offsetLeft + 20 + 'px';
     }
     if (arr[i].name === '') cueTip.style.display = 'none';
     // Mouse move event - follow the mouse pointer on Y axis only
@@ -267,24 +267,24 @@ const setCueInfo = (e, arr) => {
 
 // Extract media Bolt ID from the URL path
 const getBoltId = (url) => {
-  const path = new URL(url).pathname;
-  const segments = path.split('/').filter(Boolean);
-  return segments.length >= 5 ? segments[3] : null;
+    const path = new URL(url).pathname;
+    const segments = path.split('/').filter(Boolean);
+    return segments.length >= 5 ? segments[3] : null;
 };
 
 // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
 const convertTime = (seconds) => {
-  seconds = Math.round(seconds);
-  let hours = Math.floor(seconds / 3600),
-      minutes = Math.floor(seconds / 60),
-      remainderSeconds = seconds % 60;
-  if (seconds >= 3600 ) return (hours < 10 ? '0' + hours : hours) + ":" + (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
-  if (seconds < 3600 ) return (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+    seconds = Math.round(seconds);
+    let hours = Math.floor(seconds / 3600),
+        minutes = Math.floor(seconds / 60),
+        remainderSeconds = seconds % 60;
+    if (seconds >= 3600) return (hours < 10 ? '0' + hours : hours) + ":" + (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+    if (seconds < 3600) return (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
 }
 
 // Generate the chapter thumbnails based on data in the filtered array
 const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
-  const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
+    const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
         chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
@@ -292,12 +292,12 @@ const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
         chapter_col_container = document.querySelector('#chapter_col_container'),
         chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
         chapter_col = document.querySelectorAll('.chapter_col');
-  // Loop through and build array
-  for (let i = 0; i < arr.length; i++) {
-    chapter_col_wrapper.innerHTML += `
+    // Loop through and build array
+    for (let i = 0; i < arr.length; i++) {
+        chapter_col_wrapper.innerHTML += `
       <div class="chapter_col">
         <div class="chapter_anchor" onclick="chapterTime(${arr[i].time})">
-          <img class="chapter_thumbnail" src="${thumbURL+arr[i].time}s/match/image.jpg">
+          <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
           <div class="chapter_details">
             <div class="chapter_time">${convertTime(arr[i].time)}</div>
             <h4 class="chapter_description">${arr[i].name}</h4>
@@ -305,65 +305,65 @@ const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
         </div>
       </div>
     `;
-  }
-  // Add event listener to the arrpow buttons
-  chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow ('left'));
-  chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow ('right'));
-  if (arr.length <= 5) {
-  chapter_arrow_container.forEach(function(element){
-    element.style.display = 'none';
-  })
-  }
-  onElementAdded(chapter_col_wrapper);
+    }
+    // Add event listener to the arrpow buttons
+    chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
+    chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
+    if (arr.length <= 5) {
+        chapter_arrow_container.forEach(function (element) {
+            element.style.display = 'none';
+        })
+    }
+    onElementAdded(chapter_col_wrapper);
 }
 
 // Add the observer to watch carousel wrapper as page loads to updaate element width for scroll
 function onElementAdded(chapter_col_wrapper) {
-  if (chapter_col_wrapper) {
-    resizeObserver.observe(chapter_col_wrapper);
-  }
+    if (chapter_col_wrapper) {
+        resizeObserver.observe(chapter_col_wrapper);
+    }
 }
 
 // Callback to check mutation of the chapter wrapper element
 const resizeObserverCallback = entries => {
-  checkCarouselOverflow();
+    checkCarouselOverflow();
 };
 
 // Get boundaries of chapter window (parent) and the wrapper (child) calculate offset and display controls
 const resizeObserver = new ResizeObserver(resizeObserverCallback);
 let currentPosition = 0;
 const checkCarouselOverflow = (direction) => {
-  const p = document.querySelector('#chapter_col_container'),
+    const p = document.querySelector('#chapter_col_container'),
         c = document.querySelector('#chapter_col_wrapper'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
         chapter_col_count = document.querySelectorAll('.chapter_col').length,
         // Get number of elements in the carousel and divide that by the widh - added multiplier to create greater increment
-        carousel_shift = Number(c.offsetWidth/chapter_col_count) * 5,
+        carousel_shift = Number(c.offsetWidth / chapter_col_count) * 5,
         maxTranslateLeft = 0,
         maxTranslateRight = -(c.offsetWidth - p.offsetWidth);
-  // Display buttons based on boundaries
-  const buttonVisibility = () => {
-    chapter_left_arrow_button.style.display = currentPosition < maxTranslateLeft ? 'block' : 'none';
-    chapter_right_arrow_button.style.display = currentPosition > maxTranslateRight ? 'block' : 'none';
-    // resizeObserver.unobserve(c);
-  }
-  // Move the chapter thumbnails based on the calulated thumbnail width
-  const moveEl = () => {
-    if (direction === 'right') {
-        currentPosition = Math.max(currentPosition - carousel_shift, maxTranslateRight);
-    } else if (direction === 'left') {
-        currentPosition = Math.min(currentPosition + carousel_shift, 0);
+    // Display buttons based on boundaries
+    const buttonVisibility = () => {
+        chapter_left_arrow_button.style.display = currentPosition < maxTranslateLeft ? 'block' : 'none';
+        chapter_right_arrow_button.style.display = currentPosition > maxTranslateRight ? 'block' : 'none';
+        // resizeObserver.unobserve(c);
     }
-    c.style.transform = `translateX(${currentPosition}px)`;
-  }
-  // Call the functions to move the elements (chapter wrapper) and diplay the appropriate buttons
-  moveEl();
-  buttonVisibility();
+    // Move the chapter thumbnails based on the calulated thumbnail width
+    const moveEl = () => {
+        if (direction === 'right') {
+            currentPosition = Math.max(currentPosition - carousel_shift, maxTranslateRight);
+        } else if (direction === 'left') {
+            currentPosition = Math.min(currentPosition + carousel_shift, 0);
+        }
+        c.style.transform = `translateX(${currentPosition}px)`;
+    }
+    // Call the functions to move the elements (chapter wrapper) and diplay the appropriate buttons
+    moveEl();
+    buttonVisibility();
 }
 
 // Call the point in the video and play
 const chapterTime = (time) => {
-  myPlayer.player.currentTime(time);
-  myPlayer.player.play();
+    myPlayer.player.currentTime(time);
+    myPlayer.player.play();
 }
