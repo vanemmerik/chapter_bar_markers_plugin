@@ -635,7 +635,7 @@
     var options = { "cue_marker_color": "#FFF" };
     videojs.getPlayer('myPlayer').ready(function () {
       var myPlayer = this;
-      myPlayer.cuePointMarkersPlugin(options);
+      myPlayer.cuePointChaptersPlugin(options);
     });
     const loadPlayerVideo = () => {
       const videoIdInput = document.getElementById("video_id");
@@ -662,7 +662,7 @@
       })
     }
     document.getElementById('load_video_button').addEventListener('click', loadPlayerVideo);
-    videojs.registerPlugin('cuePointMarkersPlugin', function (options) {
+    videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
       var player = this,
         imgRefBase_URL = `https://cf-images.us-east-1.prod.boltdns.net/v1/jit/`,
         pub_id = player.bcinfo.accountId,
