@@ -285,6 +285,7 @@ const convertTime = (seconds) => {
 // Generate the chapter thumbnails based on data in the filtered array
 const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
     const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
+        myPlayer = document.getElementsByTagName('video-js')[0],
         chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
