@@ -288,23 +288,27 @@ const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
         chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
-        chapter_container = document.querySelector('#vjs-chapter-container'),
-        chapter_col_container = document.querySelector('#chapter_col_container'),
-        chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
-        chapter_col = document.querySelectorAll('.chapter_col');
+        chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
     // Loop through and build array
     for (let i = 0; i < arr.length; i++) {
-        chapter_col_wrapper.innerHTML += `
-      <div class="chapter_col">
-        <div class="chapter_anchor" onclick="chapterTime(${arr[i].time})">
-          <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
-          <div class="chapter_details">
-            <div class="chapter_time">${convertTime(arr[i].time)}</div>
-            <h4 class="chapter_description">${arr[i].name}</h4>
-          </div>
-        </div>
-      </div>
-    `;
+        let chapter_col = document.createElement('div');
+        chapter_col.class = 'chaper_col';
+        chapter_col.innerHTML = `
+            <div class="chapter_anchor">
+                <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
+                <div class="chapter_details">
+                <div class="chapter_time">${convertTime(arr[i].time)}</div>
+                    <h4 class="chapter_description">${arr[i].name}</h4>
+                </div>
+            </div>
+        `;
+        chapter_col_wrapper.appendChild(chapter_col);
+        let chapter_anchor = document.querySelectorAll('.chapter_anchor');
+        // Adding event listener on chapters for each video cue point
+        chapter_anchor[i].addEventListener('click', function(){
+            myPlayer.player.currentTime(arr[i].time);
+            myPlayer.player.play();
+        });
     }
     // Add event listener to the arrpow buttons
     chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
@@ -360,10 +364,4 @@ const checkCarouselOverflow = (direction) => {
     // Call the functions to move the elements (chapter wrapper) and diplay the appropriate buttons
     moveEl();
     buttonVisibility();
-}
-
-// Call the point in the video and play
-const chapterTime = (time) => {
-    myPlayer.player.currentTime(time);
-    myPlayer.player.play();
 }
