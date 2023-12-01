@@ -7,7 +7,6 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
-            tt = player.textTracks()[0], // ********* Remove ********* for debugging purposes in standalone HTML example
             // Define the video duration as a variable
             videoDuration = player.mediainfo.duration,
             // Get Video Cloud metadata long description field
