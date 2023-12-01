@@ -292,7 +292,7 @@ const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
     // Loop through and build array
     for (let i = 0; i < arr.length; i++) {
         let chapter_col = document.createElement('div');
-        chapter_col.class = 'chaper_col';
+        chapter_col.classList.add('chapter_col');
         chapter_col.innerHTML = `
             <div class="chapter_anchor">
                 <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
