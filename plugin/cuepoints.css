@@ -491,9 +491,7 @@
 #vjs-chapter-container {
   position: relative;
   background-color: #FFF;
-  width: 100%;
-  left: 0px;
-  top: 0px;
+  margin: 0 -5px;
 }
 
 #chapter_col_container {
@@ -510,7 +508,8 @@
 #chapter_title {
   font-size: large;
   color: #000;
-  margin: 16px 0px 0px 8px;
+  margin: 0 0 0 8px;
+  padding-top: 16px;
 }
 
 .chapter_arrow_container {
