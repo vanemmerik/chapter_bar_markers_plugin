@@ -489,10 +489,11 @@
 }
 
 #vjs-chapter-container {
-  position: absolute;
+  position: relative;
   background-color: #FFF;
   width: 100%;
   left: 0px;
+  top: 0px;
 }
 
 #chapter_col_container {
