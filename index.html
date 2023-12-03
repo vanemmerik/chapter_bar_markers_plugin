@@ -935,7 +935,6 @@
         // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
         if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
         chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
-        console.log(options.chapter_bg_color)
         document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
     }
 
