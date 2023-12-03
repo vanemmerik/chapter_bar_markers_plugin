@@ -3,7 +3,15 @@
 This is an update on the [Cue-Point Markers Plugin](https://github.com/vanemmerik/cuepoints_markers_plugin). A Brightcove player plugin that adds cue point markers and associated metadata dynamically to the player progress bar and adds the filmstrip style chapters layout below the player as well.
 The usage remains largely the same but the major addition is the chapter bar which mimics the YouTube look and feel as depicted below.
 
+> [!IMPORTANT]
+> For this plugin to successfully display please use the ***advanced embed*** method.
+> We're working on the iframe embed but it needs some adjustment in order to display the plugin correctly.
+
 ![video player](readme_images/chapter_bar.gif)
+
+> [!WARNING]
+> This plugin is for demonstration purposes only. Please do not use in production.
+> The Image references for the chapter carousel are not hosted correctly and needs a robust caching/progy image management method to operate under production load.
 
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
