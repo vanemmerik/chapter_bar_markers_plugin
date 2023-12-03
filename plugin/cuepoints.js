@@ -2,7 +2,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     var player = this,
         imgRefBase_URL = `https://cf-images.us-east-1.prod.boltdns.net/v1/jit/`,
         pub_id = player.bcinfo.accountId,
-        thumbnail_dimensions = '144x81';
+        thumbnail_dimensions = options.thumbnail_lw;
     player.on('loadedmetadata', function () {
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
@@ -27,7 +27,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         assignCueEndTime(purgedCueArr, videoDuration);
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
-        if (purgedCueArr.length != 0) chapterThumbContainer(), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, thumbnail_dimensions);
+        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
         if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
     })
@@ -152,6 +152,8 @@ const addCueEl = (arr, videoDuration, options) => {
         let el = document.createElement('div');
         el.className = 'vjs-cue-marker';
         el.id = 'marker' + i;
+        // Check of marker colour is set in the plugin JSON if not make them white
+        if (!options.cue_marker_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.cue_marker_color)) options.cue_marker_color = "#FFF";
         el.style.setProperty('--marker-color', options.cue_marker_color);
         // On mouse over event - add mouse event listener to cue marker elements
         el.addEventListener("mouseover", (e) => {
@@ -183,50 +185,53 @@ const createCueInfoEl = () => {
 }
 
 // Create the chapter elements and add them to DOM
-const chapterThumbContainer = () => {
+const chapterThumbContainer = (options) => {
     let chapterContainer = document.createElement('div');
     chapterContainer.id = 'vjs-chapter-container';
     document.getElementsByTagName('video-js')[0].style.overflow = "visible";
     chapterContainer.innerHTML = `
-  <div id="chapter_title_container">
-    <h3 id="chapter_title">Chapters</h3>
-  </div>
-  <div id="chapter_left_arrow_container" class="chapter_arrow_container">
-    <div id="chapter_left_arrow" class="chapter_arrow">
-      <div id="chapter_chevron_left" class="chapter_arrow_chevron">
-        <div class="chapter_chevron_shape">
-          <div class="chevron_shape">
-            <div class="chevron_arrow">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
-              </svg>
-            </div>
-          </div>
+        <div id="chapter_title_container">
+            <h3 id="chapter_title">Chapters</h3>
         </div>
-      </div>
-    </div>
-    <div id="chapter_left_arrow_button"></div>
-  </div>
-  <div id="chapter_col_container">
-    <div id="chapter_col_wrapper"></div>
-  </div>
-  <div id="chapter_right_arrow_container" class="chapter_arrow_container">
-    <div id="chapter_right_arrow" class="chapter_arrow">
-      <div id="chapter_chevron_right" class="chapter_arrow_chevron">
-        <div class="chapter_chevron_shape">
-          <div class="chevron_shape">
-            <div class="chevron_arrow">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
-              </svg>
+        <div id="chapter_left_arrow_container" class="chapter_arrow_container">
+            <div id="chapter_left_arrow" class="chapter_arrow">
+            <div id="chapter_chevron_left" class="chapter_arrow_chevron">
+                <div class="chapter_chevron_shape">
+                <div class="chevron_shape">
+                    <div class="chevron_arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                        <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
+                    </svg>
+                    </div>
+                </div>
+                </div>
             </div>
-          </div>
+            </div>
+            <div id="chapter_left_arrow_button"></div>
         </div>
-      </div>
-    </div>
-    <div id="chapter_right_arrow_button"></div>
-  </div>
-  `
+        <div id="chapter_col_container">
+            <div id="chapter_col_wrapper"></div>
+        </div>
+        <div id="chapter_right_arrow_container" class="chapter_arrow_container">
+            <div id="chapter_right_arrow" class="chapter_arrow">
+            <div id="chapter_chevron_right" class="chapter_arrow_chevron">
+                <div class="chapter_chevron_shape">
+                <div class="chevron_shape">
+                    <div class="chevron_arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                        <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
+                    </svg>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+            <div id="chapter_right_arrow_button"></div>
+        </div>
+    `
+    // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
+    if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
+    chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
     document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
 }
 
@@ -283,7 +288,9 @@ const convertTime = (seconds) => {
 
 // Generate the chapter thumbnails based on data in the filtered array
 const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
-    const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
+    // Check if dimensions are present in the plugin config JSON
+    if (!dim.thumbnail_lw || !/^\d+x\d+$/.test(dim.thumbnail_lw)) dim.thumbnail_lw = '144x81';
+    const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim.thumbnail_lw + '/',
         myPlayer = document.getElementsByTagName('video-js')[0],
         chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),

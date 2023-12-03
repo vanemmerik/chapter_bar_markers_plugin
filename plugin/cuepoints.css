@@ -484,7 +484,7 @@
 
 #vjs-chapter-container {
   position: relative;
-  background-color: #FFF;
+  background-color: var(--chapter-color);
   top: 100%;
 }
 

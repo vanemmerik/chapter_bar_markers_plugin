@@ -478,7 +478,7 @@
 
     #vjs-chapter-container {
       position: relative;
-      background-color: #FFF;
+      background-color: var(--chapter-color);
       top: 100%;
     }
 
@@ -634,7 +634,11 @@
   </div>
   <script src="//players.brightcove.net/5380177774001/default_default/index.min.js"></script>
   <script type="text/javascript">
-    var options = { "cue_marker_color": "#FFF" };
+    var options = { 
+        "cue_marker_color": "#F0F",
+        "chapter_bg_color": "#FCF",
+        "thumbnail_lw": "288x162"
+    };
     videojs.getPlayer('myPlayer').ready(function () {
       var myPlayer = this;
       myPlayer.cuePointChaptersPlugin(options);
@@ -694,7 +698,7 @@
         assignCueEndTime(purgedCueArr, videoDuration);
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
-        if (purgedCueArr.length != 0) chapterThumbContainer(), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, thumbnail_dimensions);
+        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         displayMetaInfo(tt, purgedCueArr); // ********* Remove ********* for debugging purposes in standalone HTML example
         // If playlist player/playlist is present - clear UI for new playlist item
         if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
@@ -836,33 +840,35 @@
 
     // Build cue point markers and add them to the player progress bar
     const addCueEl = (arr, videoDuration, options) => {
-      let playerWidth = document.querySelector('.video-js').offsetWidth,
-        controlBar = document.querySelector('.vjs-progress-control'),
-        progresBar = document.querySelector('.vjs-progress-holder'),
-        cueControl = document.createElement('div'),
-        cueTip = document.createElement('div');
-      cueTip.className = 'vjs-cue-tip';
-      cueControl.className = 'vjs-cue-control';
-      cueControl.style.setProperty('--cue-control-width', playerWidth + 'px');
-      controlBar.prepend(cueControl);
-      progresBar.appendChild(cueTip);
-      // Loop through array and add elements
-      for (let i = 0; i < arr.length; i++) {
-        let el = document.createElement('div');
-        el.className = 'vjs-cue-marker';
-        el.id = 'marker' + i;
-        el.style.setProperty('--marker-color', options.cue_marker_color);
-        // On mouse over event - add mouse event listener to cue marker elements
-        el.addEventListener("mouseover", (e) => {
-          setCueInfo(e, arr);
-        });
-        let time = arr[i].time;
-        // Based on proportion of width in px using time 
-        el.style.left = `${Math.round(time / videoDuration * playerWidth)}px`;
-        cueControl.append(el);
-      }
-      // Create the inner placeholder for the cue point data on the tooltips
-      createCueInfoEl();
+        let playerWidth = document.querySelector('.video-js').offsetWidth,
+            controlBar = document.querySelector('.vjs-progress-control'),
+            progresBar = document.querySelector('.vjs-progress-holder'),
+            cueControl = document.createElement('div'),
+            cueTip = document.createElement('div');
+        cueTip.className = 'vjs-cue-tip';
+        cueControl.className = 'vjs-cue-control';
+        cueControl.style.setProperty('--cue-control-width', playerWidth + 'px');
+        controlBar.prepend(cueControl);
+        progresBar.appendChild(cueTip);
+        // Loop through array and add elements
+        for (let i = 0; i < arr.length; i++) {
+            let el = document.createElement('div');
+            el.className = 'vjs-cue-marker';
+            el.id = 'marker' + i;
+            // Check of marker colour is set in the plugin JSON if not make them white
+            if (!options.cue_marker_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.cue_marker_color)) options.cue_marker_color = "#FFF";
+            el.style.setProperty('--marker-color', options.cue_marker_color);
+            // On mouse over event - add mouse event listener to cue marker elements
+            el.addEventListener("mouseover", (e) => {
+                setCueInfo(e, arr);
+            });
+            let time = arr[i].time;
+            // Based on proportion of width in px using time 
+            el.style.left = `${Math.round(time / videoDuration * playerWidth)}px`;
+            cueControl.append(el);
+        }
+        // Create the inner placeholder for the cue point data on the tooltips
+        createCueInfoEl();
     }
 
     // Remove created elements if playlist is present and new video has loaded
@@ -882,51 +888,55 @@
     }
 
     // Create the chapter elements and add them to DOM
-    const chapterThumbContainer = () => {
-      let chapterContainer = document.createElement('div');
-      chapterContainer.id = 'vjs-chapter-container';
-      document.getElementsByTagName('video-js')[0].style.overflow = "unset";
-      chapterContainer.innerHTML = `
-          <div id="chapter_title_container">
-            <h3 id="chapter_title">Chapters</h3>
-          </div>
-          <div id="chapter_left_arrow_container" class="chapter_arrow_container">
-            <div id="chapter_left_arrow" class="chapter_arrow">
-              <div id="chapter_chevron_left" class="chapter_arrow_chevron">
-                <div class="chapter_chevron_shape">
-                  <div class="chevron_shape">
-                    <div class="chevron_arrow">
-                      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                        <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    const chapterThumbContainer = (options) => {
+        let chapterContainer = document.createElement('div');
+        chapterContainer.id = 'vjs-chapter-container';
+        document.getElementsByTagName('video-js')[0].style.overflow = "visible";
+        chapterContainer.innerHTML = `
+            <div id="chapter_title_container">
+                <h3 id="chapter_title">Chapters</h3>
             </div>
-            <div id="chapter_left_arrow_button"></div>
-          </div>
-          <div id="chapter_col_container">
-            <div id="chapter_col_wrapper"></div>
-          </div>
-          <div id="chapter_right_arrow_container" class="chapter_arrow_container">
-            <div id="chapter_right_arrow" class="chapter_arrow">
-              <div id="chapter_chevron_right" class="chapter_arrow_chevron">
-                <div class="chapter_chevron_shape">
-                  <div class="chevron_shape">
-                    <div class="chevron_arrow">
-                      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                        <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
-                      </svg>
+            <div id="chapter_left_arrow_container" class="chapter_arrow_container">
+                <div id="chapter_left_arrow" class="chapter_arrow">
+                <div id="chapter_chevron_left" class="chapter_arrow_chevron">
+                    <div class="chapter_chevron_shape">
+                    <div class="chevron_shape">
+                        <div class="chevron_arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                            <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
+                        </svg>
+                        </div>
                     </div>
-                  </div>
+                    </div>
                 </div>
-              </div>
+                </div>
+                <div id="chapter_left_arrow_button"></div>
             </div>
-            <div id="chapter_right_arrow_button"></div>
-          </div>
-          `
-      document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
+            <div id="chapter_col_container">
+                <div id="chapter_col_wrapper"></div>
+            </div>
+            <div id="chapter_right_arrow_container" class="chapter_arrow_container">
+                <div id="chapter_right_arrow" class="chapter_arrow">
+                <div id="chapter_chevron_right" class="chapter_arrow_chevron">
+                    <div class="chapter_chevron_shape">
+                    <div class="chevron_shape">
+                        <div class="chevron_arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                            <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
+                        </svg>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <div id="chapter_right_arrow_button"></div>
+            </div>
+        `
+        // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
+        if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
+        chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
+        console.log(options.chapter_bg_color)
+        document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
     }
 
     // Control mouse interaction with the cue markers - Initiated on hover state
@@ -982,37 +992,44 @@
 
     // Generate the chapter thumbnails based on data in the filtered array
     const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
-      const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim + '/',
-        chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
-        chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
-        chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
-        chapter_container = document.querySelector('#vjs-chapter-container'),
-        chapter_col_container = document.querySelector('#chapter_col_container'),
-        chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
-        chapter_col = document.querySelectorAll('.chapter_col');
-      // Loop through and build array
-      for (let i = 0; i < arr.length; i++) {
-        chapter_col_wrapper.innerHTML += `
-              <div class="chapter_col">
-                <div class="chapter_anchor" onclick="chapterTime(${arr[i].time})">
-                  <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
-                  <div class="chapter_details">
+        // Check if dimensions are present in the plugin config JSON
+        if (!dim.thumbnail_lw || !/^\d+x\d+$/.test(dim.thumbnail_lw)) dim.thumbnail_lw = '144x81';
+        const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim.thumbnail_lw + '/',
+            myPlayer = document.getElementsByTagName('video-js')[0],
+            chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
+            chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
+            chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
+            chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
+        // Loop through and build array
+        for (let i = 0; i < arr.length; i++) {
+            let chapter_col = document.createElement('div');
+            chapter_col.classList.add('chapter_col');
+            chapter_col.innerHTML = `
+                <div class="chapter_anchor">
+                    <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
+                    <div class="chapter_details">
                     <div class="chapter_time">${convertTime(arr[i].time)}</div>
-                    <h4 class="chapter_description">${arr[i].name}</h4>
-                  </div>
+                        <h4 class="chapter_description">${arr[i].name}</h4>
+                    </div>
                 </div>
-              </div>
             `;
-      }
-      // Add event listener to the arrpow buttons
-      chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
-      chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
-      if (arr.length <= 5) {
-        chapter_arrow_container.forEach(function (element) {
-          element.style.display = 'none';
-        })
-      }
-      onElementAdded(chapter_col_wrapper);
+            chapter_col_wrapper.appendChild(chapter_col);
+            let chapter_anchor = document.querySelectorAll('.chapter_anchor');
+            // Adding event listener on chapters for each video cue point
+            chapter_anchor[i].addEventListener('click', function(){
+                myPlayer.player.currentTime(arr[i].time);
+                myPlayer.player.play();
+            });
+        }
+        // Add event listener to the arrpow buttons
+        chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
+        chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
+        if (arr.length <= 5) {
+            chapter_arrow_container.forEach(function (element) {
+                element.style.display = 'none';
+            })
+        }
+        onElementAdded(chapter_col_wrapper);
     }
 
     // Add the observer to watch carousel wrapper as page loads to updaate element width for scroll

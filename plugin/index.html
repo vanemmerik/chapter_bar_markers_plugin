@@ -33,7 +33,11 @@
 <script>
     videojs.getPlayer('myPlayer').ready(function() {
     var myPlayer = this;
-        options = {"cue_marker_color": "#FFF"};
+    options = {
+        "cue_marker_color": "#F0F",
+        "chapter_bg_color": "#FEF",
+        "thumbnail_lw": "288x162"
+    };
     myPlayer.cuePointChaptersPlugin(options);
     });
 </script>
