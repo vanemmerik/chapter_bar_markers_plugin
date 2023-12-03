@@ -11,7 +11,7 @@ The usage remains largely the same but the major addition is the chapter bar whi
 
 > [!WARNING]
 > This plugin is for demonstration purposes only. Please do not use in production.
-> The Image references for the chapter carousel are not hosted correctly and needs a robust caching/progy image management method to uperate under production load.
+> The Image references for the chapter carousel are not hosted correctly and needs a robust caching/progy image management method to operate under production load.
 
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
