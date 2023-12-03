@@ -10,7 +10,7 @@ The usage remains largely the same but the major addition is the chapter bar whi
 ![video player](readme_images/chapter_bar.gif)
 
 > [!WARNING]
-> This plugin is for demonstration purposes only. Please do not use in production.
+> This plugin is for demonstration purposes only. ***Please do not use in production***.
 > The Image references for the chapter carousel are not hosted correctly and needs a robust caching/progy image management method to operate under production load.
 
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
@@ -139,24 +139,33 @@ More information on adding cue points and their types can be found here:
 https://studio.support.brightcove.com/media/general/working-cue-points-media-module.html
 
 #### Cue marker colours
-When the plugin is being configured a **Video Cloud** user has the option of setting the marker colour as follows:
+When the plugin is being configured a **Video Cloud** user has the option of setting the marker colour, chapter background and the chapter thumbnail dimensions as follows:
+* `cue_marker_color` controls the colour of the the marker that appears on the player scrub bar. If this JSON value is not present it will default to white or `#FFF`
+* `chapter_bg_color` sets the colout of the chapter thumbnail carousel background colour below the player. If this JSON value is not present it will default to transparent.
+* `thumbnail_lw` sets the dimensoions for the chapter thumbnail image. It will default to `144x81` if the JSON value is not present or not conforming to a `LxW` format.
 
 ```json
 {
-    "cue_marker_color": "#FF69B4"
+    "cue_marker_color": "#FF69B4",
+    "chapter_bg_color": "#FF69B4",
+    "thumbnail_lw": "288x162"
 }
 ```
 Or
 ```json
 {
-    "cue_marker_color": "hotpink"
+    "cue_marker_color": "hotpink",
+    "chapter_bg_color": "hotpink",
+    "thumbnail_lw": "72x40.5"
 }
 ```
 Or with some opacity?
 
 ```json
 {
-    "cue_marker_color": "rgba(245, 39, 145, 0.5)"
+    "cue_marker_color": "rgba(245, 39, 145, 0.5)",
+    "chapter_bg_color": "rgb(245, 39, 145)",
+    "thumbnail_lw": "144x81"
 }
 ```
 ![edit cue colour](readme_images/options.gif)
