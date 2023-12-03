@@ -318,12 +318,6 @@
   content: "";
 }
 
-.video-js {
-  padding: 0 5px;
-  bottom: 17px;
-  display: none;
-}
-
 .video-js:hover .vjs-cue-marker {
   opacity: 50%;
   bottom: unset;
@@ -491,7 +485,6 @@
 #vjs-chapter-container {
   position: relative;
   background-color: #FFF;
-  margin: 0 -5px;
   top: 100%;
 }
 
