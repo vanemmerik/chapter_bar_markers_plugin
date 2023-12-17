@@ -11,6 +11,7 @@ The usage remains largely the same but the major addition is the chapter bar whi
 
 > [!WARNING]
 > This plugin is for demonstration purposes only. ***Use in production at your own peril***.
+>
 > The Image references for the chapter carousel are based off the thumbnail VTT file and a v7 _or later_ Brightcove player is preferred for the plugin to perform as expected.
 > Also of note, please enable thumbnails on the player you intend to use.
 
