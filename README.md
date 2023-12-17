@@ -144,13 +144,13 @@ https://studio.support.brightcove.com/media/general/working-cue-points-media-mod
 When the plugin is being configured a **Video Cloud** user has the option of setting the marker colour, chapter background and the chapter thumbnail dimensions as follows:
 * `cue_marker_color` controls the colour of the the marker that appears on the player scrub bar. If this JSON value is not present it will default to white or `#FFF`
 * `chapter_bg_color` sets the colout of the chapter thumbnail carousel background colour below the player. If this JSON value is not present it will default to transparent.
-* `thumbnail_lw` sets the dimensoions for the chapter thumbnail image. It will default to `144x81` if the JSON value is not present or not conforming to a `LxW` format.
+* `thumbnail_w` sets the dimensoions for the chapter thumbnail image by stipulating a width. It will default to `144` if the JSON value is not present or not conforming to a `numerical` format.
 
 ```json
 {
     "cue_marker_color": "#FF69B4",
     "chapter_bg_color": "#FF69B4",
-    "thumbnail_lw": "288x162"
+    "thumbnail_w": "288"
 }
 ```
 Or
@@ -158,7 +158,7 @@ Or
 {
     "cue_marker_color": "hotpink",
     "chapter_bg_color": "hotpink",
-    "thumbnail_lw": "72x40.5"
+    "thumbnail_lw": "72.5"
 }
 ```
 Or with some opacity?
@@ -167,7 +167,7 @@ Or with some opacity?
 {
     "cue_marker_color": "rgba(245, 39, 145, 0.5)",
     "chapter_bg_color": "rgb(245, 39, 145)",
-    "thumbnail_lw": "144x81"
+    "thumbnail_lw": "144"
 }
 ```
 ![edit cue colour](readme_images/options.gif)
