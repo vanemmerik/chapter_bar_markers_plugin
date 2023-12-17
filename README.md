@@ -10,8 +10,9 @@ The usage remains largely the same but the major addition is the chapter bar whi
 ![video player](readme_images/chapter_bar.gif)
 
 > [!WARNING]
-> This plugin is for demonstration purposes only. ***Please do not use in production***.
-> The Image references for the chapter carousel are not hosted correctly and needs a robust caching/progy image management method to operate under production load.
+> This plugin is for demonstration purposes only. ***Use in production at your own peril***.
+> The Image references for the chapter carousel are based off the thumbnail VTT file and a v7 _or later_ Brightcove player is preferred for the plugin to perform as expected.
+> Also of note, please enable thumbnails on the player you intend to use.
 
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
