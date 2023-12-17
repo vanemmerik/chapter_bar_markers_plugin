@@ -158,7 +158,7 @@ Or
 {
     "cue_marker_color": "hotpink",
     "chapter_bg_color": "hotpink",
-    "thumbnail_lw": "72.5"
+    "thumbnail_w": "72"
 }
 ```
 Or with some opacity?
@@ -167,7 +167,7 @@ Or with some opacity?
 {
     "cue_marker_color": "rgba(245, 39, 145, 0.5)",
     "chapter_bg_color": "rgb(245, 39, 145)",
-    "thumbnail_lw": "144"
+    "thumbnail_w": "144"
 }
 ```
 ![edit cue colour](readme_images/options.gif)
