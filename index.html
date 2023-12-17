@@ -669,24 +669,22 @@
     }
     document.getElementById('load_video_button').addEventListener('click', loadPlayerVideo);
     videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
-      var player = this,
-        imgRefBase_URL = `https://cf-images.us-east-1.prod.boltdns.net/v1/jit/`,
-        pub_id = player.bcinfo.accountId,
-        thumbnail_dimensions = '144x81';
-      player.on('loadedmetadata', function () {
+    var player = this;
+    player.on('loadedmetadata', function () {
         let cuePointsArr = new Array(),
-          filteredCueArr = new Array(),
-          purgedCueArr = new Array(),
-          tt = player.textTracks()[0], // ********* Remove ********* for debugging purposes in standalone HTML example
-          // Define the video duration as a variable
-          videoDuration = player.mediainfo.duration,
-          // Get Video Cloud metadata long description field
-          longDesc = player.mediainfo.longDescription,
-          // Define video ID for playlist player management
-          videoId = player.mediainfo.id;
+            filteredCueArr = new Array(),
+            purgedCueArr = new Array(),
+            // Define the video duration as a variable
+            videoDuration = player.mediainfo.duration,
+            // Get Video Cloud metadata long description field
+            longDesc = player.mediainfo.longDescription,
+            // Define video ID for playlist player management
+            videoId = player.mediainfo.id,
+            // VTT URL based on player reference
+            vtt_url = player.thumbnails().metadataTrackEl_.src;
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
-          cuePointsArr.push(player.mediainfo.cuePoints[i]);
+            cuePointsArr.push(player.mediainfo.cuePoints[i]);
         }
         // Check for chapters in the longDescription metadata field, sort and merge
         xtractMatch(longDesc, cuePointsArr, videoDuration, videoId);
@@ -698,8 +696,9 @@
         assignCueEndTime(purgedCueArr, videoDuration);
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
-        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
-        displayMetaInfo(tt, purgedCueArr); // ********* Remove ********* for debugging purposes in standalone HTML example
+        // Check for populated array and generate chapter bar-container
+        // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
+        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
         if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
       })
@@ -760,6 +759,28 @@
       // Sort array based on time
       arrSort(arr);
     }
+
+    const fetchVTTFile = async (url) => {
+        try {
+            const response = await fetch(url);
+            const data = await response.text();
+            return data;
+        } catch (error) {
+            console.error('Error fetching VTT file:', error);
+            return null;
+        }
+    };
+
+    const parseVTT = (vtt_data) => {
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder()),
+        vtt_image_array = new Array();
+        parser.oncue = function(cue) {
+            vtt_image_array.push({ start: cue.startTime, end: cue.endTime, img_src: cue.text });
+        };
+        parser.parse(vtt_data);
+        parser.flush();
+        return vtt_image_array;
+    };
 
     // Array sort - order array based on time from lowest to highest
     const arrSort = (arr) => {
@@ -874,7 +895,8 @@
     // Remove created elements if playlist is present and new video has loaded
     const rmCueEl = () => {
       let cueControl = document.querySelector('.vjs-cue-control'),
-        cueTip = document.querySelector('.vjs-cue-tip');
+          cueTip = document.querySelector('.vjs-cue-tip');
+      // document.getElementsByTagName('video-js')[0].style.overflow = "hidden";
       if (cueTip !== null) cueTip.remove();
       if (cueControl !== null) cueControl.remove();
     }
@@ -972,12 +994,11 @@
       });
     }
 
-    // Extract media Bolt ID from the URL path
-    const getBoltId = (url) => {
-      const path = new URL(url).pathname;
-      const segments = path.split('/').filter(Boolean);
-      return segments.length >= 5 ? segments[3] : null;
-    };
+    const matchVttTime = (seconds, vtt_image_array) => {
+    seconds = Math.round(seconds / 5) * 5;
+    let time_match = vtt_image_array.find(obj => obj.start === seconds);
+    return time_match.img_src;
+    }
 
     // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
     const convertTime = (seconds) => {
@@ -990,36 +1011,42 @@
     }
 
     // Generate the chapter thumbnails based on data in the filtered array
-    const chapterThumbs = (url, pub_id, bolt_id, arr, dim) => {
-        // Check if dimensions are present in the plugin config JSON
-        if (!dim.thumbnail_lw || !/^\d+x\d+$/.test(dim.thumbnail_lw)) dim.thumbnail_lw = '144x81';
-        const thumbURL = url + pub_id + '/' + bolt_id + '/main/' + dim.thumbnail_lw + '/',
-            myPlayer = document.getElementsByTagName('video-js')[0],
+    const chapterThumbs = (url, arr, dim) => {
+        const myPlayer = document.getElementsByTagName('video-js')[0],
             chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
             chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
             chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
             chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
-        // Loop through and build array
-        for (let i = 0; i < arr.length; i++) {
-            let chapter_col = document.createElement('div');
-            chapter_col.classList.add('chapter_col');
-            chapter_col.innerHTML = `
-                <div class="chapter_anchor">
-                    <img class="chapter_thumbnail" src="${thumbURL + arr[i].time}s/match/image.jpg">
-                    <div class="chapter_details">
-                    <div class="chapter_time">${convertTime(arr[i].time)}</div>
-                        <h4 class="chapter_description">${arr[i].name}</h4>
+        const get_vtt_data = async () => {
+            let vtt_image_array;
+            vtt_data = await fetchVTTFile(url);
+            vtt_image_array = parseVTT (vtt_data);
+            // Check if dimensions are present in the plugin config JSON
+            if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) dim.thumbnail_w = '144';
+            // Loop through and build array
+            for (let i = 0; i < arr.length; i++) {
+                let chapter_col = document.createElement('div');
+                chapter_col.classList.add('chapter_col');
+                let vtt_img_src = matchVttTime(arr[i].time, vtt_image_array);
+                chapter_col.innerHTML = `
+                    <div class="chapter_anchor">
+                        <img class="chapter_thumbnail" src="${vtt_img_src}" width="${dim.thumbnail_w}">
+                        <div class="chapter_details">
+                        <div class="chapter_time">${convertTime(arr[i].time)}</div>
+                            <h4 class="chapter_description">${arr[i].name}</h4>
+                        </div>
                     </div>
-                </div>
-            `;
-            chapter_col_wrapper.appendChild(chapter_col);
-            let chapter_anchor = document.querySelectorAll('.chapter_anchor');
-            // Adding event listener on chapters for each video cue point
-            chapter_anchor[i].addEventListener('click', function(){
-                myPlayer.player.currentTime(arr[i].time);
-                myPlayer.player.play();
-            });
+                `;
+                chapter_col_wrapper.appendChild(chapter_col);
+                let chapter_anchor = document.querySelectorAll('.chapter_anchor');
+                // Adding event listener on chapters for each video cue point
+                chapter_anchor[i].addEventListener('click', function(){
+                    myPlayer.player.currentTime(arr[i].time);
+                    myPlayer.player.play();
+                });
+            }
         }
+        get_vtt_data();
         // Add event listener to the arrpow buttons
         chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
         chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
