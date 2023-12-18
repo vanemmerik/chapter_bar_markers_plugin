@@ -674,6 +674,7 @@
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
+            tt = player.textTracks()[0], // ********* Remove ********* for debugging purposes in standalone HTML example
             // Define the video duration as a variable
             videoDuration = player.mediainfo.duration,
             // Get Video Cloud metadata long description field
@@ -696,8 +697,8 @@
         assignCueEndTime(purgedCueArr, videoDuration);
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
+        displayMetaInfo(tt, purgedCueArr); // ********* Remove ********* for debugging purposes in standalone HTML example
         // Check for populated array and generate chapter bar-container
-        // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
         if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
