@@ -11,9 +11,10 @@ The usage remains largely the same but the major addition is the chapter bar whi
 
 > [!WARNING]
 > This plugin is for demonstration purposes only. ***Use in production at your own peril***.
->
 > The Image references for the chapter carousel are based off the thumbnail VTT file and a v7 _or later_ Brightcove player is preferred for the plugin to perform as expected.
-> Also of note, please enable thumbnails on the player you intend to use.
+> Also of note, please enable thumbnails on the player you intend to use. Never fear, if you don't use a thumbnail enabled player the poster image will be repurposed for use for the thumbnail images akin to YouTube.
+> If you prefer the richer experience ensure you use a thumbnail enabled player.
+> The options are found in the [Video Cloud Players Module](https://player.support.brightcove.com/plugins/thumbnails-plugin.html#Implementing_thumbnails_using_Studio).
 
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
