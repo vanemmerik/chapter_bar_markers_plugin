@@ -11,7 +11,13 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
             // Define video ID for playlist player management
             videoId = player.mediainfo.id,
             // VTT URL based on player reference
+            vtt_url;
+        // Check for Presence of VTT file or thumbnail enabled player
+        if (player.thumbnails){
             vtt_url = player.thumbnails().metadataTrackEl_.src;
+          } else {
+            vtt_url = player.poster();
+          }
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
             cuePointsArr.push(player.mediainfo.cuePoints[i]);
@@ -28,7 +34,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         addCueEl(purgedCueArr, videoDuration, options);
         // Check for populated array and generate chapter bar-container
         // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
-        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(vtt_url, purgedCueArr, options);
+        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
         if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
     })
@@ -292,10 +298,15 @@ const setCueInfo = (e, arr) => {
     });
 }
 
-const matchVttTime = (seconds, vtt_image_array) => {
+const matchVttTime = (player, seconds, vtt_image_array) => {
     seconds = Math.round(seconds / 5) * 5;
     let time_match = vtt_image_array.find(obj => obj.start === seconds);
-    return time_match.img_src;
+    // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
+    if (time_match){
+        return time_match.img_src;
+    } else {
+        return player.poster();
+    }
 }
 
 // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
@@ -309,15 +320,16 @@ const convertTime = (seconds) => {
 }
 
 // Generate the chapter thumbnails based on data in the filtered array
-const chapterThumbs = (url, arr, dim) => {
-    const myPlayer = document.getElementsByTagName('video-js')[0],
-        chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
+const chapterThumbs = (player, url, arr, dim) => {
+    const chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
         chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
     const get_vtt_data = async () => {
         let vtt_image_array;
+        // Fetch the VTT fle basef on plyer reference
         vtt_data = await fetchVTTFile(url);
+        // Parse the VTT into array
         vtt_image_array = parseVTT (vtt_data);
         // Check if dimensions are present in the plugin config JSON
         if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) dim.thumbnail_w = '144';
@@ -325,7 +337,8 @@ const chapterThumbs = (url, arr, dim) => {
         for (let i = 0; i < arr.length; i++) {
             let chapter_col = document.createElement('div');
             chapter_col.classList.add('chapter_col');
-            let vtt_img_src = matchVttTime(arr[i].time, vtt_image_array);
+            let vtt_img_src;
+            vtt_img_src = matchVttTime(player, arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" width="${dim.thumbnail_w}">
@@ -339,8 +352,8 @@ const chapterThumbs = (url, arr, dim) => {
             let chapter_anchor = document.querySelectorAll('.chapter_anchor');
             // Adding event listener on chapters for each video cue point
             chapter_anchor[i].addEventListener('click', function(){
-                myPlayer.player.currentTime(arr[i].time);
-                myPlayer.player.play();
+                player.currentTime(arr[i].time);
+                player.play();
             });
         }
     }
