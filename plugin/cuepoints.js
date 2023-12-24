@@ -217,7 +217,6 @@ const createCueInfoEl = () => {
 const chapterThumbContainer = (options) => {
     let chapterContainer = document.createElement('div');
     chapterContainer.id = 'vjs-chapter-container';
-    document.getElementsByTagName('video-js')[0].style.overflow = "visible";
     chapterContainer.innerHTML = `
         <div id="chapter_title_container">
             <h3 id="chapter_title">Chapters</h3>
@@ -261,7 +260,7 @@ const chapterThumbContainer = (options) => {
     // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
     if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
     chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
-    document.querySelector('.vjs-player-info-modal').insertAdjacentElement('afterend', chapterContainer);
+    document.querySelector('video-js').insertAdjacentElement('afterend', chapterContainer);
 }
 
 // Control mouse interaction with the cue markers - Initiated on hover state
