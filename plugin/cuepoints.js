@@ -201,8 +201,8 @@ const addCueEl = (arr, videoDuration, options) => {
 const rmCueEl = () => {
     let cueControl = document.querySelector('.vjs-cue-control'),
         cueTip = document.querySelector('.vjs-cue-tip');
-    if (cueTip !== null) cueTip.remove();
-    if (cueControl !== null) cueControl.remove();
+    if (cueTip) cueTip.remove();
+    if (cueControl) cueControl.remove();
 }
 
 // Remove created chapter tiles if playlist is present and new video has loaded
