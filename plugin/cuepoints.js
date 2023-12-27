@@ -36,7 +36,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
-        if (player.playlistUi !== undefined) player.on('playlistitem', function () { rmCueEl() })
+        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl()}), rmChapterEl(), currentPosition = 0;
     })
 });
 
@@ -203,6 +203,13 @@ const rmCueEl = () => {
         cueTip = document.querySelector('.vjs-cue-tip');
     if (cueTip !== null) cueTip.remove();
     if (cueControl !== null) cueControl.remove();
+}
+
+// Remove created chapter tiles if playlist is present and new video has loaded
+const rmChapterEl = () => {
+    let chapterControl = document.querySelector('#vjs-chapter-container');
+    // Call observer to kill the mutation watcher
+    if (chapterControl) stopObserving(document.querySelector('#chapter_col_wrapper'), 0), chapterControl.remove();
 }
 
 // Create and introduce to DOM the information tool data
@@ -378,6 +385,20 @@ function onElementAdded(chapter_col_wrapper) {
 // Callback to check mutation of the chapter wrapper element
 const resizeObserverCallback = entries => {
     checkCarouselOverflow();
+};
+
+// Function to call document.querySelector('#chapter_col_wrapper') as the element and stop the mutation observer
+const stopObserving = (element, timeout) => {
+    if (!resizeObserver) return console.log('No mutation observer present.');
+    if (timeout > 0) {
+        setTimeout(() => {
+            resizeObserver.unobserve(element);
+            console.log('Stopped observing after timeout.');
+        }, timeout);
+    } else {
+        resizeObserver.unobserve(element);
+        console.log('Stopped observing immediately.');
+    }
 };
 
 // Get boundaries of chapter window (parent) and the wrapper (child) calculate offset and display controls
