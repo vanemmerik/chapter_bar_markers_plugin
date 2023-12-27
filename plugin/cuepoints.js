@@ -184,7 +184,7 @@ const addCueEl = (arr, videoDuration, options) => {
         el.className = 'vjs-cue-marker';
         el.id = 'marker' + i;
         // Check of marker colour is set in the plugin JSON if not make them white
-        if (!options.cue_marker_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.cue_marker_color)) options.cue_marker_color = "#FFF";
+        if (!options.cue_marker_color || !/^(#[0-9a-f]{3,4}(?:[0-9a-f]{3,4})?|rgba?\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(?:,\s*(0|1|0?\.\d+))?\s*\)|[a-z]+)$/i.test(options.cue_marker_color)) options.cue_marker_color = "#FFF";
         el.style.setProperty('--marker-color', options.cue_marker_color);
         // On mouse over event - add mouse event listener to cue marker elements
         el.addEventListener("mouseover", (e) => {
@@ -267,7 +267,7 @@ const chapterThumbContainer = (options) => {
         </div>
     `
     // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
-    if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
+    if (!options.chapter_bg_color || !/^(#[0-9a-f]{3,4}(?:[0-9a-f]{3,4})?|rgba?\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(?:,\s*(0|1|0?\.\d+))?\s*\)|[a-z]+)$/i.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
     chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
     document.querySelector('video-js').insertAdjacentElement('afterEnd', chapterContainer);
 }
