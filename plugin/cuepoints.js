@@ -13,10 +13,12 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
             // VTT URL based on player reference
             vtt_url;
         // Check for Presence of VTT file or thumbnail enabled player
-        if (player.thumbnails){
+        if (player.thumbnails().metadataTrackEl_){
+            console.log('VTT present');
             vtt_url = player.thumbnails().metadataTrackEl_.src;
           } else {
-            vtt_url = player.poster();
+            vtt_url = player.mediainfo.poster;
+            console.log('VTT not present');
           }
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
@@ -36,7 +38,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
-        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl()}), rmChapterEl(), currentPosition = 0;
+        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl(), rmChapterEl()}), currentPosition = 0;
     })
 });
 
@@ -68,7 +70,7 @@ const xtractMatch = (string, arr, videoDuration, videoId) => {
 const fetchVTTFile = async (url) => {
     try {
         const response = await fetch(url);
-        const data = await response.text();
+        const data = await response.text() ;
         return data;
     } catch (error) {
         console.error('Error fetching VTT file:', error);
@@ -267,7 +269,7 @@ const chapterThumbContainer = (options) => {
     // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
     if (!options.chapter_bg_color || !/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$|^rgb(a)?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
     chapterContainer.style.setProperty('--chapter-color', options.chapter_bg_color);
-    document.querySelector('video-js').insertAdjacentElement('afterend', chapterContainer);
+    document.querySelector('video-js').insertAdjacentElement('afterEnd', chapterContainer);
 }
 
 // Control mouse interaction with the cue markers - Initiated on hover state
@@ -311,7 +313,7 @@ const matchVttTime = (player, seconds, vtt_image_array) => {
     if (time_match){
         return time_match.img_src;
     } else {
-        return player.poster();
+        return player.mediainfo.poster;
     }
 }
 
@@ -343,8 +345,9 @@ const chapterThumbs = (player, url, arr, dim) => {
         for (let i = 0; i < arr.length; i++) {
             let chapter_col = document.createElement('div');
             chapter_col.classList.add('chapter_col');
-            let vtt_img_src;
+            let vtt_img_src = 0;
             vtt_img_src = matchVttTime(player, arr[i].time, vtt_image_array);
+            console.log();
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" width="${dim.thumbnail_w}">
