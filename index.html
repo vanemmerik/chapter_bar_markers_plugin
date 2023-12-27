@@ -688,10 +688,12 @@
             // VTT URL based on player reference
             vtt_url;
         // Check for Presence of VTT file or thumbnail enabled player
-        if (player.thumbnails){
-          vtt_url = player.thumbnails().metadataTrackEl_.src;
+        if (player.thumbnails().metadataTrackEl_){
+            console.log('VTT present');
+            vtt_url = player.thumbnails().metadataTrackEl_.src;
         } else {
-          vtt_url = player.poster();
+            vtt_url = player.mediainfo.poster;
+            console.log('VTT not present');
         }
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
@@ -711,7 +713,7 @@
         // Check for populated array and generate chapter bar-container
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
         // If playlist player/playlist is present - clear UI for new playlist item
-        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl()}), rmChapterEl(), currentPosition = 0;
+        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl(), rmChapterEl()}), currentPosition = 0;
       })
     });
     // ********* Remove ********* for debugging purposes in standalone HTML example
@@ -1018,7 +1020,7 @@
       if (time_match){
         return time_match.img_src;
       } else {
-        return player.poster();
+        return player.mediainfo.poster;
       }
     }
 
