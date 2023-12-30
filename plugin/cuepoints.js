@@ -14,7 +14,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
             vtt_url;
         // Check for Presence of VTT file or thumbnail enabled player
         if (player.thumbnails().metadataTrackEl_){
-            console.log('VTT present');
+            console.log('VTT present - generating thumbnail array');
             vtt_url = player.thumbnails().metadataTrackEl_.src;
           } else {
             vtt_url = player.mediainfo.poster;
@@ -35,10 +35,9 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
         // Check for populated array and generate chapter bar-container
-        // if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(imgRefBase_URL, pub_id, getBoltId(player.mediainfo.poster), purgedCueArr, options);
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
-        // If playlist player/playlist is present - clear UI for new playlist item
-        if (player.playlistUi) player.on('playlistitem', function () {rmCueEl(), rmChapterEl()}), currentPosition = 0;
+        // If playlist player/playlist/chapters are present - clear UI elements for new playlist/media item
+        player.on('loadstart', function() {rmChapterEl(), rmCueEl()});
     })
 });
 
@@ -210,8 +209,8 @@ const rmCueEl = () => {
 // Remove created chapter tiles if playlist is present and new video has loaded
 const rmChapterEl = () => {
     let chapterControl = document.querySelector('#vjs-chapter-container');
-    // Call observer to kill the mutation watcher
-    if (chapterControl) stopObserving(document.querySelector('#chapter_col_wrapper'), 0), chapterControl.remove();
+    // Call observer to kill the mutation watcher - remove the chapter UI element and reset the carousel postion
+    if (chapterControl) stopObserving(document.querySelector('#chapter_col_wrapper'), 0), chapterControl.remove(), currentPosition = 0;
 }
 
 // Create and introduce to DOM the information tool data
