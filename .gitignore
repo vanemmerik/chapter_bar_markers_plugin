@@ -1,8 +1,9 @@
 .DS_Store
-index_iframe.html
 .gitignore
-plugin/iframe_src.html
+.vscode/
+index_iframe.html
+index_nothumbs.html
 index_playlist_adv_embed.html
 index_playlist_iframe.html
+plugin/iframe_src.html
 plugin/index_playlist.html
-.vscode/
