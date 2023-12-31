@@ -315,14 +315,14 @@ const setCueInfo = (e, arr) => {
     });
 }
 
-const matchVttTime = (player, seconds, vtt_image_array) => {
+const matchVttTime = (url, seconds, vtt_image_array) => {
     seconds = Math.round(seconds / 5) * 5;
     let time_match = vtt_image_array.find(obj => obj.start === seconds);
     // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
     if (time_match){
         return time_match.img_src;
     } else {
-        return player.mediainfo.thumbnail;
+        return url;
     }
 }
 
@@ -355,8 +355,7 @@ const chapterThumbs = (player, url, arr, dim) => {
             let chapter_col = document.createElement('div');
             chapter_col.classList.add('chapter_col');
             let vtt_img_src = 0;
-            vtt_img_src = matchVttTime(player, arr[i].time, vtt_image_array);
-            console.log();
+            vtt_img_src = matchVttTime(url, arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" width="${dim.thumbnail_w}">
