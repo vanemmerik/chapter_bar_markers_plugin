@@ -680,15 +680,7 @@
             // Define video ID for playlist player management
             videoId = player.mediainfo.id,
             // VTT URL based on player reference
-            vtt_url;
-        // Check for Presence of VTT file or thumbnail enabled player
-        if (player.thumbnails().metadataTrackEl_){
-            console.log('VTT present - Generating thumbnail array');
-            vtt_url = player.thumbnails().metadataTrackEl_.src;
-        } else {
-            vtt_url = player.mediainfo.poster;
-            console.log('VTT not present');
-        }
+            vtt_url = filterVttUrl(player);
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
             cuePointsArr.push(player.mediainfo.cuePoints[i]);
@@ -741,6 +733,23 @@
         dynamicHTML_MI += "endTime: " + arr[i].endTime + "<br/>";
       }
       document.querySelector("#insertionPoint_MI").innerHTML = dynamicHTML_MI;
+    }
+
+    // Check for Presence of VTT file or thumbnail enabled player
+    const filterVttUrl = (player) => {
+        if (typeof player.thumbnails === 'function'){
+            const res = player.thumbnails();
+            if (!res.metadataTrackEl_){
+                console.log('Looks like a playlist player - No thumbnail VTT here');
+                return vtt_url = player.mediainfo.thumbnail;
+            } else {
+                console.log('Thumbnail VTT detected - Building array');
+                return vtt_url = res.metadataTrackEl_.src;
+            }
+        } else {
+            console.log('Thumbnail VTT file not present');
+            return vtt_url = player.mediainfo.thumbnail;
+        }
     }
 
     const xtractMatch = (string, arr, videoDuration, videoId) => {

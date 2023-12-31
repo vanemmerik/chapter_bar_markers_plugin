@@ -11,15 +11,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
             // Define video ID for playlist player management
             videoId = player.mediainfo.id,
             // VTT URL based on player reference
-            vtt_url;
-        // Check for Presence of VTT file or thumbnail enabled player
-        if (player.thumbnails().metadataTrackEl_){
-            console.log('VTT present - generating thumbnail array');
-            vtt_url = player.thumbnails().metadataTrackEl_.src;
-          } else {
-            vtt_url = player.mediainfo.poster;
-            console.log('VTT not present');
-          }
+            vtt_url = filterVttUrl(player);
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
             cuePointsArr.push(player.mediainfo.cuePoints[i]);
@@ -40,6 +32,46 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         player.on('loadstart', function() {rmChapterEl(), rmCueEl()});
     })
 });
+
+// Check for Presence of VTT file or thumbnail enabled player
+const filterVttUrl = (player) => {
+    if (typeof player.thumbnails === 'function'){
+        const res = player.thumbnails();
+        if (!res.metadataTrackEl_){
+            console.log('Looks like a playlist player - No thumbnail VTT here');
+            return vtt_url = player.mediainfo.thumbnail;
+        } else {
+            console.log('Thumbnail VTT detected - Building array');
+            return vtt_url = res.metadataTrackEl_.src;
+        }
+    } else {
+        console.log('Thumbnail VTT file not present');
+        return vtt_url = player.mediainfo.thumbnail;
+    }
+}
+
+// Fetch the VTT file if present
+const fetchVTTFile = async (url) => {
+    try {
+        const response = await fetch(url);
+        const data = await response.text() ;
+        return data;
+    } catch (error) {
+        console.error('Error fetching VTT file:', error);
+        return null;
+    }
+};
+
+const parseVTT = (vtt_data) => {
+    const parser = new WebVTT.Parser(window, WebVTT.StringDecoder()),
+    vtt_image_array = new Array();
+    parser.oncue = function(cue) {
+        vtt_image_array.push({ start: cue.startTime, end: cue.endTime, img_src: cue.text });
+    };
+    parser.parse(vtt_data);
+    parser.flush();
+    return vtt_image_array;
+};
 
 const xtractMatch = (string, arr, videoDuration, videoId) => {
     if (string === null) return (arrSort(arr));
@@ -65,28 +97,6 @@ const xtractMatch = (string, arr, videoDuration, videoId) => {
     // Sort array based on time
     arrSort(arr);
 }
-
-const fetchVTTFile = async (url) => {
-    try {
-        const response = await fetch(url);
-        const data = await response.text() ;
-        return data;
-    } catch (error) {
-        console.error('Error fetching VTT file:', error);
-        return null;
-    }
-};
-
-const parseVTT = (vtt_data) => {
-    const parser = new WebVTT.Parser(window, WebVTT.StringDecoder()),
-    vtt_image_array = new Array();
-    parser.oncue = function(cue) {
-        vtt_image_array.push({ start: cue.startTime, end: cue.endTime, img_src: cue.text });
-    };
-    parser.parse(vtt_data);
-    parser.flush();
-    return vtt_image_array;
-};
 
 // Array sort - order array based on time from lowest to highest
 const arrSort = (arr) => {
