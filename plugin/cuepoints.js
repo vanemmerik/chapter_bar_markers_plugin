@@ -322,7 +322,7 @@ const matchVttTime = (player, seconds, vtt_image_array) => {
     if (time_match){
         return time_match.img_src;
     } else {
-        return player.mediainfo.poster;
+        return player.mediainfo.thumbnail;
     }
 }
 
