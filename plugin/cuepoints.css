@@ -419,17 +419,19 @@
     }
 
     .chapter_col{
-      margin: 12px 6px !important;
+      margin: 12px 0px !important;
     }
 
     .chapter_anchor{
       display: flex !important;
+      border-radius: 5px !important;
     }
 
     .chapter_thumbnail{
       width: unset !important;
       border-radius: 5px !important;
-      height: 5vh;
+      height: 12vh;
+      margin: auto 4px;
     }
     
     .chapter_details{
@@ -479,17 +481,19 @@
     }
 
     .chapter_col{
-      margin: 12px 6px !important;
+      margin: 12px 0px !important;
     }
 
     .chapter_anchor{
       display: flex !important;
+      border-radius: 5px !important;
     }
 
     .chapter_thumbnail{
       width: unset !important;
       border-radius: 5px !important;
-      height: 5vh;
+      height: 12vh;
+      margin: auto 4px;
     }
     
     .chapter_details{
