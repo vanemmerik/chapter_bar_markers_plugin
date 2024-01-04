@@ -425,6 +425,12 @@
     .chapter_anchor{
       display: flex !important;
     }
+
+    .chapter_thumbnail{
+      width: unset !important;
+      border-radius: 5px !important;
+      height: 5vh;
+    }
     
     .chapter_details{
       left: 15px;
@@ -478,6 +484,12 @@
 
     .chapter_anchor{
       display: flex !important;
+    }
+
+    .chapter_thumbnail{
+      width: unset !important;
+      border-radius: 5px !important;
+      height: 5vh;
     }
     
     .chapter_details{

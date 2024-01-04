@@ -358,7 +358,7 @@ const chapterThumbs = (player, url, arr, dim) => {
             vtt_img_src = matchVttTime(url, arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
-                    <img class="chapter_thumbnail" src="${vtt_img_src}" width="${dim.thumbnail_w}">
+                    <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
                     <div class="chapter_details">
                     <div class="chapter_time">${convertTime(arr[i].time)}</div>
                         <h4 class="chapter_description">${arr[i].name}</h4>
