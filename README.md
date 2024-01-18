@@ -174,10 +174,10 @@ Or with some opacity?
 ![edit cue colour](readme_images/options.gif)
 
 ### Installation
-Please follow the [well docemented guide on installing plugins](https://player.support.brightcove.com/coding-topics/step-step-plugin-development.html#Deploy_the_plugin) for a Brightcove player. This is considered to be a **custom** plugin as the references to the JavaScript file, CSS file and adding the JSON options are essential.\
+Please follow the [well documented guide on installing plugins](https://player.support.brightcove.com/coding-topics/step-step-plugin-development.html#Deploy_the_plugin) for a Brightcove player. This is considered to be a **custom** plugin as the references to the JavaScript file, CSS file and adding the JSON options are essential.\
 Key ingredients: The [javascript file](cuepoints.js), [the CSS file](cuepoints.css) and [adding options JSON](https://studio.support.brightcove.com/players/general/configuring-player-plugins.html#add_plugin) to the plugin configuration as _illustrated above_.
 #### It's all in the name: 
-Make sure the plugin is named `cuePointChaptersPlugin` in the `plugin name` field in the Video Cloud plyers module.
+Make sure the plugin is named `cuePointChaptersPlugin` in the `plugin name` field in the Video Cloud players module.
 Watch the video at the following Brightcove docs page on how to install a plugin. The guide details the plugin name quite well.
 https://player.support.brightcove.com/basics/developer-basics-custom-plugin-using-studio.html
 
