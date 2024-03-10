@@ -54,7 +54,7 @@ const filterVttUrl = (player) => {
 const fetchVTTFile = async (url) => {
     try {
         const response = await fetch(url);
-        const data = await response.text() ;
+        const data = await response.text();
         return data;
     } catch (error) {
         console.error('Error fetching VTT file:', error);
@@ -316,7 +316,8 @@ const setCueInfo = (e, arr) => {
 }
 
 const matchVttTime = (url, seconds, vtt_image_array) => {
-    seconds = Math.round(seconds / 5) * 5;
+    const increment = vtt_image_array[0].end - vtt_image_array[0].start;
+    seconds = Math.round(seconds / increment) * increment;
     let time_match = vtt_image_array.find(obj => obj.start === seconds);
     // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
     if (time_match){
@@ -356,6 +357,7 @@ const chapterThumbs = (player, url, arr, dim) => {
             chapter_col.classList.add('chapter_col');
             let vtt_img_src = 0;
             vtt_img_src = matchVttTime(url, arr[i].time, vtt_image_array);
+            // console.log(arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
