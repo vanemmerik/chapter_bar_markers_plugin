@@ -1085,13 +1085,14 @@
     }
 
     const matchVttTime = (url, seconds, vtt_image_array) => {
-      seconds = Math.round(seconds / 5) * 5;
+      const increment = vtt_image_array[0].end - vtt_image_array[0].start;
+      seconds = Math.round(seconds / increment) * increment;
       let time_match = vtt_image_array.find(obj => obj.start === seconds);
       // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
       if (time_match){
-        return time_match.img_src;
+          return time_match.img_src;
       } else {
-        return url;
+          return url;
       }
     }
 
