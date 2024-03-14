@@ -331,11 +331,18 @@ const matchVttTime = (url, seconds, vtt_image_array) => {
 const convertTime = (seconds) => {
     seconds = Math.round(seconds);
     let hours = Math.floor(seconds / 3600),
-        minutes = Math.floor(seconds / 60),
+        minutes = Math.floor((seconds % 3600) / 60), // Fix minutes calculation
         remainderSeconds = seconds % 60;
-    if (seconds >= 3600) return (hours < 10 ? '0' + hours : hours) + ":" + (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
-    if (seconds < 3600) return (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
-}
+    if (seconds >= 3600) {
+      return (hours < 10 ? '0' + hours : hours) + ":" +
+             (minutes < 10 ? '0' + minutes : minutes) + ":" + // Minutes fixed
+             (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+    } else {
+      // No change needed here, but clarified the condition
+      return (minutes < 10 ? '0' + minutes : minutes) + ":" +
+             (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+    }
+  }
 
 // Generate the chapter thumbnails based on data in the filtered array
 const chapterThumbs = (player, url, arr, dim) => {
