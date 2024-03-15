@@ -316,15 +316,12 @@ const setCueInfo = (e, arr) => {
 }
 
 const matchVttTime = (url, seconds, vtt_image_array) => {
+    if (!vtt_image_array[0]) return url;
     const increment = vtt_image_array[0].end - vtt_image_array[0].start;
     seconds = Math.round(seconds / increment) * increment;
     let time_match = vtt_image_array.find(obj => obj.start === seconds);
     // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
-    if (time_match){
-        return time_match.img_src;
-    } else {
-        return url;
-    }
+    return time_match ? time_match.img_src : url;
 }
 
 // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
@@ -364,7 +361,6 @@ const chapterThumbs = (player, url, arr, dim) => {
             chapter_col.classList.add('chapter_col');
             let vtt_img_src = 0;
             vtt_img_src = matchVttTime(url, arr[i].time, vtt_image_array);
-            // console.log(arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
