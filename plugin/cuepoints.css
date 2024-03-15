@@ -8,6 +8,10 @@
   width: var(--cue-control-width);
 }
 
+.vjs-next-button .vjs-icon-placeholder:before {
+  content: "\f123";
+}
+
 /* Ainmations */
 @keyframes expand-marker {
   0% {
