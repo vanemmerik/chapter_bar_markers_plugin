@@ -1092,19 +1092,13 @@
 
     // Convert time in seconds back to digital HH:MM:SS format or MM:SS depending on duration
     const convertTime = (seconds) => {
-      seconds = Math.round(seconds);
-      let hours = Math.floor(seconds / 3600),
-          minutes = Math.floor((seconds % 3600) / 60), // Fix minutes calculation
-          remainderSeconds = seconds % 60;
-      if (seconds >= 3600) {
-        return (hours < 10 ? '0' + hours : hours) + ":" +
-              (minutes < 10 ? '0' + minutes : minutes) + ":" + // Minutes fixed
-              (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
-      } else {
-        // No change needed here, but clarified the condition
-        return (minutes < 10 ? '0' + minutes : minutes) + ":" +
-              (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
-      }
+        seconds = Math.round(seconds);
+        let hours = Math.floor(seconds / 3600),
+        minutes = Math.floor((seconds % 3600) / 60), // Fix minutes calculation
+        remainderSeconds = seconds % 60;
+        const minSec = (minutes < 10 ? '0' + minutes : minutes) + ":" +
+        (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+        return hours > 0 ? (hours < 10 ? '0' + hours : hours) + ":" + minSec : minSec;
     }
 
     // Generate the chapter thumbnails based on data in the filtered array
