@@ -1,6 +1,6 @@
 videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     var player = this;
-    player.on('loadedmetadata', function () {
+    player.on('loadstart', function () {
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
@@ -9,9 +9,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
             // Get Video Cloud metadata long description field
             longDesc = player.mediainfo.longDescription,
             // Define video ID for playlist player management
-            videoId = player.mediainfo.id,
-            // VTT URL based on player reference
-            vtt_url = filterVttUrl(player);
+            videoId = player.mediainfo.id;
         // Add existing cue point metadata to the cue points array
         for (let i = 0; i < player.mediainfo.cuePoints.length; i++) {
             cuePointsArr.push(player.mediainfo.cuePoints[i]);
@@ -27,31 +25,69 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         // Take purged cue point information and add cue markers to player progress bar
         addCueEl(purgedCueArr, videoDuration, options);
         // Check for populated array and generate chapter bar-container
-        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, vtt_url, purgedCueArr, options);
+        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
         // If playlist player/playlist/chapters are present - clear UI elements for new playlist/media item
         player.on('loadstart', function() {rmChapterEl(), rmCueEl()});
     })
 });
 
 // Check for Presence of VTT file or thumbnail enabled player
-const filterVttUrl = (player) => {
+const filterVTTUrl = async (player) => {
+    let vtt_url;
+    if (player.activePlugins_.ssai) {
+        console.log("SSAI enabled player detected - fetching SSAI VTT file");
+        vtt_url = await fetchSsaiVTTFile('https://ssaimanifest.prod.boltdns.net/playback/once/v1/vmap/hls/v7/clear/codec_avc1_mp4a/5380177774001/bfb4d50f-696e-4323-b9b8-3d06e05716f5/daa8728c-f341-4373-bc98-55d7b8022ea9/content.vmap?bc_token=NjYyYjg5OWRfYWFkOGQwMWZiYjE1NTM5M2Y3ZDU0ODU3NTk5ZWI4ZDhiOGI5MTg4ZmM3NzM3YTU3NjVkNjQyMDkyMDc0ZjU2ZA%3D%3D&rule=discos-enabled');
+    } else if (player.activePlugins_.ima3) {
+        console.log("IMA3 plugin detected - Using static thumbnail images");
+        vtt_url = player.mediainfo.thumbnail;
+    }
+
+    if (vtt_url) {
+        return vtt_url;
+    }
+    
+    console.log("No VTT URL found from SSAI or IMA3. Checking for thumbnail VTT");
     if (typeof player.thumbnails === 'function'){
         const res = player.thumbnails();
         if (!res.metadataTrackEl_){
             console.log('Looks like a playlist player - No thumbnail VTT here');
-            return vtt_url = player.mediainfo.thumbnail;
         } else {
             console.log('Thumbnail VTT detected - Building array');
-            return vtt_url = res.metadataTrackEl_.src;
+            return res.metadataTrackEl_.src;
         }
     } else {
-        console.log('Thumbnail VTT file not present');
-        return vtt_url = player.mediainfo.thumbnail;
+        console.log('No function for thumbnails or VTT file not present');
     }
+    return player.mediainfo.thumbnail; // This default return moves here, after all checks.
 }
+
+
+// Fetch the VTT thumbnail file from VMAP by processing the XML
+const fetchSsaiVTTFile = async (url) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        const xmlString = await response.text(); // Get the response body as text
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const thumbnailNode = xmlDoc.getElementsByTagName('bc:thumbnailURL')[0];
+        if (thumbnailNode) {
+            return thumbnailNode.innerHTML;
+        } else {
+            throw new Error('Thumbnail URL node not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching or parsing the XML:', error);
+        throw error; // Rethrow to allow caller to handle it
+    }
+};
+
 
 // Fetch the VTT file if present
 const fetchVTTFile = async (url) => {
+    console.log(url);
     try {
         const response = await fetch(url);
         const data = await response.text();
@@ -315,11 +351,14 @@ const setCueInfo = (e, arr) => {
     });
 }
 
-const matchVttTime = (url, seconds, vtt_image_array) => {
+const matchVTTTime = (url, seconds, vtt_image_array) => {
+    // Check if the first element of vtt_image_array exists, return thumbnail URL if not
     if (!vtt_image_array[0]) return url;
-    const increment = vtt_image_array[0].end - vtt_image_array[0].start;
-    seconds = Math.round(seconds / increment) * increment;
-    let time_match = vtt_image_array.find(obj => obj.start === seconds);
+    const increment = vtt_image_array[0].end - vtt_image_array[0].start,
+        offset = vtt_image_array[0].start,
+        adjustedSeconds = seconds + offset,
+        roundedSeconds = Math.round(adjustedSeconds/increment) * increment;
+    let time_match = vtt_image_array.find(obj => roundedSeconds >= obj.start && roundedSeconds < obj.end);
     // For thumbnail enabled player provide VTT based image src otherwise use a poster image for each thumbnail
     return time_match ? time_match.img_src : url;
 }
@@ -330,23 +369,24 @@ const convertTime = (seconds) => {
     let hours = Math.floor(seconds / 3600),
     minutes = Math.floor((seconds % 3600) / 60), // Fix minutes calculation
     remainderSeconds = seconds % 60;
-    const minSec = (minutes < 10 ? '0' + minutes : minutes) + ":" +
-    (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
+    const minSec = (minutes < 10 ? '0' + minutes : minutes) + ":" + (remainderSeconds < 10 ? '0' + remainderSeconds : remainderSeconds);
     return hours > 0 ? (hours < 10 ? '0' + hours : hours) + ":" + minSec : minSec;
 }
 
 // Generate the chapter thumbnails based on data in the filtered array
-const chapterThumbs = (player, url, arr, dim) => {
+const chapterThumbs = (player, arr, dim) => {
     const chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
         chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
-    const get_vtt_data = async () => {
-        let vtt_image_array;
-        // Fetch the VTT fle basef on plyer reference
+    const getVTTData = async () => {
+        let vtt_image_array, url;
+        // Use the player reference to figure out which thumb VTT to use if any
+        url = await filterVTTUrl(player);
+        // Fetch the VTT fle based on plyer reference
         vtt_data = await fetchVTTFile(url);
         // Parse the VTT into array
-        vtt_image_array = parseVTT (vtt_data);
+        vtt_image_array = parseVTT(vtt_data);
         // Check if dimensions are present in the plugin config JSON
         if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) dim.thumbnail_w = '144';
         // Loop through and build array
@@ -354,7 +394,7 @@ const chapterThumbs = (player, url, arr, dim) => {
             let chapter_col = document.createElement('div');
             chapter_col.classList.add('chapter_col');
             let vtt_img_src = 0;
-            vtt_img_src = matchVttTime(url, arr[i].time, vtt_image_array);
+            vtt_img_src = matchVTTTime(url, arr[i].time, vtt_image_array);
             chapter_col.innerHTML = `
                 <div class="chapter_anchor">
                     <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
@@ -373,7 +413,7 @@ const chapterThumbs = (player, url, arr, dim) => {
             });
         }
     }
-    get_vtt_data();
+    getVTTData();
     // Add event listener to the arrpow buttons
     chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
     chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
