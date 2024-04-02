@@ -62,7 +62,7 @@ const filterVTTUrl = async (player) => {
 }
 
 
-// ################# REDUNDAT FUNCTION #################### 
+// ################# REDUNDANT FUNCTION #################### 
 // Fetch the VTT thumbnail file from VMAP by processing/parsing the XML --- Left as a contingency
 const fetchSsaiVTTFile = async (url) => {
     try {
@@ -434,7 +434,7 @@ function onElementAdded(chapter_col_wrapper) {
 }
 
 // Callback to check mutation of the chapter wrapper element
-const resizeObserverCallback = entries => {
+const resizeObserverCallback = _entries => {
     checkCarouselOverflow();
 };
 
