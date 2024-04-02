@@ -31,7 +31,7 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     })
 });
 
-// Check for Presence of VTT file or thumbnail enabled player
+// Check for presence of VTT file, SSAI, CSAI or thumbnail enabled player
 const filterVTTUrl = async (player) => {
     let vtt_url;
     if (player.ssai) {
