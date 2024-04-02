@@ -34,9 +34,9 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
 // Check for Presence of VTT file or thumbnail enabled player
 const filterVTTUrl = async (player) => {
     let vtt_url;
-    if (player.activePlugins_.ssai) {
+    if (player.ssai) {
         console.log("SSAI enabled player detected - fetching SSAI VTT file");
-        vtt_url = await fetchSsaiVTTFile('https://ssaimanifest.prod.boltdns.net/playback/once/v1/vmap/hls/v7/clear/codec_avc1_mp4a/5380177774001/bfb4d50f-696e-4323-b9b8-3d06e05716f5/daa8728c-f341-4373-bc98-55d7b8022ea9/content.vmap?bc_token=NjYyYjg5OWRfYWFkOGQwMWZiYjE1NTM5M2Y3ZDU0ODU3NTk5ZWI4ZDhiOGI5MTg4ZmM3NzM3YTU3NjVkNjQyMDkyMDc0ZjU2ZA%3D%3D&rule=discos-enabled');
+        vtt_url = player.ssai().vmap.thumbnails[0].url;
     } else if (player.activePlugins_.ima3) {
         console.log("IMA3 plugin detected - Using static thumbnail images");
         vtt_url = player.mediainfo.thumbnail;
@@ -62,7 +62,8 @@ const filterVTTUrl = async (player) => {
 }
 
 
-// Fetch the VTT thumbnail file from VMAP by processing the XML
+// ################# REDUNDAT FUNCTION #################### 
+// Fetch the VTT thumbnail file from VMAP by processing/parsing the XML --- Left as a contingency
 const fetchSsaiVTTFile = async (url) => {
     try {
         const response = await fetch(url);
