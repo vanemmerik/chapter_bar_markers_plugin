@@ -1,6 +1,7 @@
 videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     var player = this;
     player.on('loadstart', function () {
+        disposeEl(); // Remove any chapter or playlist elements from the DOM before loading the player
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
@@ -26,13 +27,11 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         addCueEl(purgedCueArr, videoDuration, options);
         // Check for populated array and generate chapter bar-container
         if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
-        // If playlist player/playlist/chapters are present - clear UI elements for new playlist/media item
-        player.on('loadstart', function() {rmChapterEl(), rmCueEl()});
     })
 });
 
 // Check for presence of VTT file, SSAI, CSAI or thumbnail enabled player
-const filterVTTUrl = async (player) => {
+async function filterVTTUrl(player) {
     let vtt_url;
     if (player.ssai) {
         console.log("SSAI enabled player detected - fetching SSAI VTT file");
@@ -45,11 +44,11 @@ const filterVTTUrl = async (player) => {
     if (vtt_url) {
         return vtt_url;
     }
-    
+
     console.log("No VTT URL found from SSAI or IMA3. Checking for thumbnail VTT");
-    if (typeof player.thumbnails === 'function'){
+    if (typeof player.thumbnails === 'function') {
         const res = player.thumbnails();
-        if (!res.metadataTrackEl_){
+        if (!res.metadataTrackEl_) {
             console.log('Looks like a playlist player - No thumbnail VTT here');
         } else {
             console.log('Thumbnail VTT detected - Building array');
@@ -246,16 +245,13 @@ const addCueEl = (arr, videoDuration, options) => {
 }
 
 // Remove created elements if playlist is present and new video has loaded
-const rmCueEl = () => {
+const disposeEl = () => {
     let cueControl = document.querySelector('.vjs-cue-control'),
-        cueTip = document.querySelector('.vjs-cue-tip');
+        cueTip = document.querySelector('.vjs-cue-tip'),
+        chapterControl = document.querySelector('#vjs-chapter-container');
     if (cueTip) cueTip.remove();
     if (cueControl) cueControl.remove();
-}
-
-// Remove created chapter tiles if playlist is present and new video has loaded
-const rmChapterEl = () => {
-    let chapterControl = document.querySelector('#vjs-chapter-container');
+    // Remove created chapter tiles if playlist is present and new video has loaded
     // Call observer to kill the mutation watcher - remove the chapter UI element and reset the carousel postion
     if (chapterControl) stopObserving(document.querySelector('#chapter_col_wrapper'), 0), chapterControl.remove(), currentPosition = 0;
 }
@@ -406,9 +402,9 @@ const chapterThumbs = (player, arr, dim) => {
                 </div>
             `;
             chapter_col_wrapper.appendChild(chapter_col);
-            let chapter_anchor = document.querySelectorAll('.chapter_anchor');
+            let chapter_anchor = chapter_col.querySelector('.chapter_anchor');
             // Adding event listener on chapters for each video cue point
-            chapter_anchor[i].addEventListener('click', function(){
+            chapter_anchor.addEventListener('click', function(){
                 player.currentTime(arr[i].time);
                 player.play();
             });
