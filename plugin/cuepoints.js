@@ -1,7 +1,7 @@
 videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
     var player = this;
     player.on('loadstart', function () {
-        disposeEl(); // Remove any chapter or playlist elements from the DOM before loading the player
+        disposeEl(); // Remove any chapter or playlist elements from the DOM before loading metadata
         let cuePointsArr = new Array(),
             filteredCueArr = new Array(),
             purgedCueArr = new Array(),
