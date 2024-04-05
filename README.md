@@ -19,10 +19,14 @@ The usage remains largely the same but the major addition is the chapter bar whi
 The plugn prioritises the cue metadata form Video Cloud over the "chapter" metadata associated with the video object.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
 \
-This implementation has been tested against the Brightcove player version 7.2 and 6.67.\
+This implementation has been tested against the Brightcove player version 7.2.* and 6.67.*\
 Browser testing has been mild but **Firefox 110.0.1**, **Chrome 111.0.5563.64** and **Safari 16.3** have done the rounds. Edge requires a review.\
 \
-**What remains untested:** The running of this plugin alongside the IMA ads plugin needs more thorough testing in the context of Server Side Ad Insertion and Client Side Ad Insertion where chapters are used to trigger mid-roll video ads.
+**What has now been tested:** ~~The running of this plugin alongside the IMA ads plugin needs more thorough testing in the context of Server Side Ad Insertion and Client Side Ad Insertion where chapters are used to trigger mid-roll video ads.~~
+This has now been tested and the plugin's load has been set to `on.loadstart` as opposed to `on.loadedmetadata` where the parameters for the plugin load where CSAI and SSAI are used. In both instances the plugin loads where the IMA3 plugin and SSAI are present. Else the plugin loads the chapters as usual where the cue point data is present.
+
+#### Expected chapter behavious ####
+The Brightcove player supports thumbnail VTT files in a few conditions and as such the thumbnail image will display for the chapters as opposed to the array from the thumbnail VTT file. Static thumbnail images display where the player is a **playlist player** or where the **ima3 plugin (CSAI)** has been applied. For SSAI and standard implementations of the Brightcove player where thumbnails have been enabled the VTT thumbnail array will display.
 
 ### Behaviours
 
@@ -172,6 +176,36 @@ Or with some opacity?
 }
 ```
 ![edit cue colour](readme_images/options.gif)
+
+#### Display of plugin features
+As part of the same configuration options the player can be set to display the chaper markers on the scrub bar or to display the chapter thumbnails under the player. The JSON config is as follows:
+```json
+{
+  "display": "chapters",
+  "cue_marker_color": "00F",
+  "chapter_bg_color": "Cornsilk",
+  "thumbnail_w": "145"
+}
+```
+The above example forces the player to display the chapters only whereas the following example sets the player to only display the markers on the scrub bar.
+```json
+{
+  "display": "markers",
+  "cue_marker_color": "000",
+  "chapter_bg_color": "Cornsilk",
+  "thumbnail_w": "140"
+}
+```
+If you would like to display both thumbnail chapters below the player and markers with descriptions on the scrub bar you have the option of defining the options as follows:
+```json
+{
+  "display": "both",
+  "cue_marker_color": "000",
+  "chapter_bg_color": "FFF",
+  "thumbnail_w": "132"
+}
+```
+If the `display` option is not present the plugin will automattically set the display for *both* chapters and markers.
 
 ### Installation
 Please follow the [well documented guide on installing plugins](https://player.support.brightcove.com/coding-topics/step-step-plugin-development.html#Deploy_the_plugin) for a Brightcove player. This is considered to be a **custom** plugin as the references to the JavaScript file, CSS file and adding the JSON options are essential.\
