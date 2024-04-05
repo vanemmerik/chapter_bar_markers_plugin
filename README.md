@@ -38,6 +38,7 @@ The Brightcove player supports thumbnail VTT files in a few conditions and as su
 * The colour of the cue markers can be defined in the Video Cloud player module as a JSON option
 * Once chapters have been added the change will be detected by all deployed Brightcove players that have this plugin installed
 * Intended for desktop web - Cue point elements have been hidden for mobile intentionally
+* Configurable via JSAON options for displaying chapters, markers or both
 
 #### Repo structure and purpose
 <table>
