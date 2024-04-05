@@ -700,7 +700,8 @@
     </div>
     <script src="//players.brightcove.net/5380177774001/default_default/index.min.js"></script>
     <script type="text/javascript">
-      var options = { 
+      var options = {
+          "display": "both",
           "cue_marker_color": "#FCF",
           "chapter_bg_color": "WhiteSmoke",
           "thumbnail_w": "144"
@@ -754,12 +755,10 @@
           purgedCueArr = dedupeArr(filteredCueArr);
           // Assign endTime to cue points in sorted array
           assignCueEndTime(purgedCueArr, videoDuration);
-          // Take purged cue point information and add cue markers to player progress bar
-          addCueEl(purgedCueArr, videoDuration, options);
+          // Take JSON optoins from plugin config and define chapters, markers or both
+          defineChapters(player, purgedCueArr, videoDuration, options);
           // ********* Remove ********* for debugging purposes in standalone HTML example
           displayMetaInfo(tt, purgedCueArr);
-          // Check for populated array and generate chapter bar-container
-          if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
         })
       });
       // ********* Remove ********* for debugging purposes in standalone HTML example
@@ -792,6 +791,28 @@
           dynamicHTML_MI += "endTime: " + arr[i].endTime + "<br/>";
         }
         document.querySelector("#insertionPoint_MI").innerHTML = dynamicHTML_MI;
+      }
+
+      // Display chapter thumbnails, scrub bar markers or both based on options
+      const defineChapters = (player, purgedCueArr, videoDuration, options) => {
+          let display = options.display;
+          switch (display) {
+              case 'chapters':
+                  // Check for populated array and generate chapter bar-container
+                  if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+                  break;
+              case 'markers':
+                  // Take purged cue point information and add cue markers to player progress bar
+                  addCueEl(purgedCueArr, videoDuration, options);
+                  break;
+              case 'both':
+                  addCueEl(purgedCueArr, videoDuration, options);
+                  if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+                  break;
+              default:
+                  addCueEl(purgedCueArr, videoDuration, options);
+                  if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+          }
       }
 
       // Check for presence of VTT file, SSAI, CSAI or thumbnail enabled player
