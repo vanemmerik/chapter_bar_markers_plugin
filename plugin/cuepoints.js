@@ -23,15 +23,35 @@ videojs.registerPlugin('cuePointChaptersPlugin', function (options) {
         purgedCueArr = dedupeArr(filteredCueArr);
         // Assign endTime to cue points in sorted array
         assignCueEndTime(purgedCueArr, videoDuration);
-        // Take purged cue point information and add cue markers to player progress bar
-        addCueEl(purgedCueArr, videoDuration, options);
-        // Check for populated array and generate chapter bar-container
-        if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+        // Take JSON optoins from plugin config and define chapters, markers or both
+        defineChapters(player, purgedCueArr, videoDuration, options);
     })
 });
 
+// Display chapter thumbnails, scrub bar markers or both based on options
+const defineChapters = (player, purgedCueArr, videoDuration, options) => {
+    let display = options.display;
+    switch (display) {
+        case 'chapters':
+            // Check for populated array and generate chapter bar-container
+            if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+            break;
+        case 'markers':
+            // Take purged cue point information and add cue markers to player progress bar
+            addCueEl(purgedCueArr, videoDuration, options);
+            break;
+        case 'both':
+            addCueEl(purgedCueArr, videoDuration, options);
+            if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+            break;
+        default:
+            addCueEl(purgedCueArr, videoDuration, options);
+            if (purgedCueArr.length != 0) chapterThumbContainer(options), chapterThumbs(player, purgedCueArr, options);
+    }
+}
+
 // Check for presence of VTT file, SSAI, CSAI or thumbnail enabled player
-async function filterVTTUrl(player) {
+const filterVTTUrl = async (player) => {
     let vtt_url;
     if (player.ssai) {
         console.log("SSAI enabled player detected - fetching SSAI VTT file");
