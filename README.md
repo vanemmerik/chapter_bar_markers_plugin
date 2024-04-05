@@ -25,7 +25,7 @@ Browser testing has been mild but **Firefox 110.0.1**, **Chrome 111.0.5563.64** 
 **What has now been tested:** ~~The running of this plugin alongside the IMA ads plugin needs more thorough testing in the context of Server Side Ad Insertion and Client Side Ad Insertion where chapters are used to trigger mid-roll video ads.~~
 This has now been tested and the plugin's load has been set to `on.loadstart` as opposed to `on.loadedmetadata` where the parameters for the plugin load where CSAI and SSAI are used. In both instances the plugin loads where the IMA3 plugin and SSAI are present. Else the plugin loads the chapters as usual where the cue point data is present.
 
-#### Expected chapter behavious ####
+#### Expected chapter behaviours ####
 The Brightcove player supports thumbnail VTT files in a few conditions and as such the thumbnail image will display for the chapters as opposed to the array from the thumbnail VTT file. Static thumbnail images display where the player is a **playlist player** or where the **ima3 plugin (CSAI)** has been applied. For SSAI and standard implementations of the Brightcove player where thumbnails have been enabled the VTT thumbnail array will display.
 
 ### Behaviours
