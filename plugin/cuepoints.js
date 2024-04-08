@@ -289,6 +289,10 @@ const chapterThumbContainer = (options) => {
     let chapterContainer = document.createElement('div');
     chapterContainer.id = 'vjs-chapter-container';
     chapterContainer.innerHTML = `
+        <div id="chapter_load_container">
+            <div id="chapter_load_progress"></div>
+            <p id="chapter_load_text">Loading:</p>
+        </div>
         <div id="chapter_title_container">
             <h3 id="chapter_title">Chapters</h3>
         </div>
@@ -392,46 +396,87 @@ const convertTime = (seconds) => {
 
 // Generate the chapter thumbnails based on data in the filtered array
 const chapterThumbs = (player, arr, dim) => {
-    const chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
+    const chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
+        chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
         chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
         chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
-        chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
+        totalImages = arr.length;
+    let loadedImages = 0,
+        loadPromises = [];
+
+    const updateLoadingBar = () => {
+        const percentage = (loadedImages / totalImages) * 100;
+        document.getElementById('chapter_load_progress').style.width = `${percentage}%`;
+    };
+
     const getVTTData = async () => {
-        let vtt_image_array, url;
-        // Use the player reference to figure out which thumb VTT to use if any
-        url = await filterVTTUrl(player);
-        // Fetch the VTT fle based on plyer reference
-        vtt_data = await fetchVTTFile(url);
-        // Parse the VTT into array
-        vtt_image_array = parseVTT(vtt_data);
-        // Check if dimensions are present in the plugin config JSON
-        if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) dim.thumbnail_w = '144';
-        // Loop through and build array
+        const url = await filterVTTUrl(player);
+        const vtt_data = await fetchVTTFile(url);
+        const vtt_image_array = parseVTT(vtt_data);
+
+        if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) {
+            dim.thumbnail_w = '144'; // Default width if not specified or invalid
+        }
+
         for (let i = 0; i < arr.length; i++) {
-            let chapter_col = document.createElement('div');
-            chapter_col.classList.add('chapter_col');
-            let vtt_img_src = 0;
-            vtt_img_src = matchVTTTime(url, arr[i].time, vtt_image_array);
-            chapter_col.innerHTML = `
-                <div class="chapter_anchor">
-                    <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
-                    <div class="chapter_details">
+            const chapter_col = document.createElement('div');
+            chapter_col.classList.add('chapter_col', 'hidden');
+            const vtt_img_src = matchVTTTime(url, arr[i].time, vtt_image_array);
+            
+            // Create and append the chapter thumbnail image
+            const imgElement = document.createElement('img');
+            imgElement.classList.add('chapter_thumbnail');
+            imgElement.style.width = `${dim.thumbnail_w}px`;
+            imgElement.src = vtt_img_src;
+
+            // Create chapter details
+            const chapterDetailsHTML = `
+                <div class="chapter_details">
                     <div class="chapter_time">${convertTime(arr[i].time)}</div>
-                        <h4 class="chapter_description">${arr[i].name}</h4>
-                    </div>
+                    <h4 class="chapter_description">${arr[i].name}</h4>
                 </div>
             `;
+
+            // Create the chapter anchor and append elements
+            const chapter_anchor = document.createElement('div');
+            chapter_anchor.classList.add('chapter_anchor');
+            chapter_anchor.appendChild(imgElement);
+            chapter_anchor.innerHTML += chapterDetailsHTML;
+            chapter_col.appendChild(chapter_anchor);
             chapter_col_wrapper.appendChild(chapter_col);
-            let chapter_anchor = chapter_col.querySelector('.chapter_anchor');
-            // Adding event listener on chapters for each video cue point
+
+            let imgPromise = new Promise((resolve, reject) => {
+                imgElement.onload = () => {
+                    loadedImages++;
+                    updateLoadingBar();
+                    resolve();
+                };
+                imgElement.onerror = () => {
+                    console.error("Failed to load image", imgElement.src);
+                    reject(new Error(`Failed to load image: ${imgElement.src}`));
+                };
+            });
+            loadPromises.push(imgPromise);
+
             chapter_anchor.addEventListener('click', function(){
                 player.currentTime(arr[i].time);
                 player.play();
             });
         }
-    }
+
+        Promise.all(loadPromises).then(() => {
+            let chapter_cols = document.querySelectorAll('.chapter_col');
+            chapter_cols.forEach(col => {
+                col.classList.remove('hidden');
+            });
+            document.getElementById('chapter_load_container').style.display = 'none';
+        }).catch(error => {
+            console.error("An error occurred loading one or more images", error);
+        });
+    };
+
     getVTTData();
-    // Add event listener to the arrpow buttons
+    // Add event listener to the arrow buttons
     chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
     chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
     if (arr.length <= 5) {
