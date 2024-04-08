@@ -183,7 +183,7 @@ As part of the same configuration options the player can be set to display the c
 ```json
 {
   "display": "chapters",
-  "cue_marker_color": "00F",
+  "cue_marker_color": "#00F",
   "chapter_bg_color": "Cornsilk",
   "thumbnail_w": "145"
 }
@@ -192,7 +192,7 @@ The above example forces the player to display the chapters only whereas the fol
 ```json
 {
   "display": "markers",
-  "cue_marker_color": "000",
+  "cue_marker_color": "#000",
   "chapter_bg_color": "Cornsilk",
   "thumbnail_w": "140"
 }
@@ -201,8 +201,8 @@ If you would like to display both thumbnail chapters below the player and marker
 ```json
 {
   "display": "both",
-  "cue_marker_color": "000",
-  "chapter_bg_color": "FFF",
+  "cue_marker_color": "#000",
+  "chapter_bg_color": "#FFF",
   "thumbnail_w": "132"
 }
 ```
