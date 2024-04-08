@@ -545,6 +545,32 @@
         background-color: var(--chapter-color);
         top: 100%;
       }
+      #chapter_load_container {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 50%;
+        border: 1px solid silver;
+        background: #EEE;
+        height: 10px;
+        border-radius: 5px;
+      }
+
+      #chapter_load_progress {
+        width: 0%;
+        height: 100%;
+        background: #4b4b4b;
+        transition: width 0.5s ease;
+      }
+
+      #chapter_load_text{
+        margin: 10px auto;
+        width: 50%;
+        text-align: center;
+        color: silver;
+      }
 
       #chapter_col_container {
         display: flex;
@@ -620,6 +646,10 @@
       .chapter_col {
         margin: 12px 6px;
         width: min-content;
+      }
+
+      .chapter_col.hidden{
+        display: none;
       }
 
       .chapter_col:nth-child(1) {
@@ -1054,44 +1084,48 @@
           let chapterContainer = document.createElement('div');
           chapterContainer.id = 'vjs-chapter-container';
           chapterContainer.innerHTML = `
-              <div id="chapter_title_container">
-                  <h3 id="chapter_title">Chapters</h3>
-              </div>
-              <div id="chapter_left_arrow_container" class="chapter_arrow_container">
-                  <div id="chapter_left_arrow" class="chapter_arrow">
-                  <div id="chapter_chevron_left" class="chapter_arrow_chevron">
-                      <div class="chapter_chevron_shape">
-                      <div class="chevron_shape">
-                          <div class="chevron_arrow">
-                          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                              <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
-                          </svg>
-                          </div>
-                      </div>
-                      </div>
-                  </div>
-                  </div>
-                  <div id="chapter_left_arrow_button"></div>
-              </div>
-              <div id="chapter_col_container">
-                  <div id="chapter_col_wrapper"></div>
-              </div>
-              <div id="chapter_right_arrow_container" class="chapter_arrow_container">
-                  <div id="chapter_right_arrow" class="chapter_arrow">
-                  <div id="chapter_chevron_right" class="chapter_arrow_chevron">
-                      <div class="chapter_chevron_shape">
-                      <div class="chevron_shape">
-                          <div class="chevron_arrow">
-                          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                              <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
-                          </svg>
-                          </div>
-                      </div>
+          <div id="chapter_load_container">
+              <div id="chapter_load_progress"></div>
+              <p id="chapter_load_text">Loading:</p>
+          </div>
+          <div id="chapter_title_container">
+              <h3 id="chapter_title">Chapters</h3>
+          </div>
+          <div id="chapter_left_arrow_container" class="chapter_arrow_container">
+              <div id="chapter_left_arrow" class="chapter_arrow">
+              <div id="chapter_chevron_left" class="chapter_arrow_chevron">
+                  <div class="chapter_chevron_shape">
+                  <div class="chevron_shape">
+                      <div class="chevron_arrow">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                          <path d="M14.96 18.96 8 12l6.96-6.96.71.71L9.41 12l6.25 6.25-.7.71z"></path>
+                      </svg>
                       </div>
                   </div>
                   </div>
-                  <div id="chapter_right_arrow_button"></div>
               </div>
+              </div>
+              <div id="chapter_left_arrow_button"></div>
+          </div>
+          <div id="chapter_col_container">
+              <div id="chapter_col_wrapper"></div>
+          </div>
+          <div id="chapter_right_arrow_container" class="chapter_arrow_container">
+              <div id="chapter_right_arrow" class="chapter_arrow">
+              <div id="chapter_chevron_right" class="chapter_arrow_chevron">
+                  <div class="chapter_chevron_shape">
+                  <div class="chevron_shape">
+                      <div class="chevron_arrow">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                          <path d="m9.4 18.4-.7-.7 5.6-5.6-5.7-5.7.7-.7 6.4 6.4-6.3 6.3z"></path>
+                      </svg>
+                      </div>
+                  </div>
+                  </div>
+              </div>
+              </div>
+              <div id="chapter_right_arrow_button"></div>
+          </div>
           `
           // Check whether chapter bacground colour is set in the plugin JSON if not make it transparent
           if (!options.chapter_bg_color || !/^(#[0-9a-f]{3,4}(?:[0-9a-f]{3,4})?|rgba?\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(?:,\s*(0|1|0?\.\d+))?\s*\)|[a-z]+)$/i.test(options.chapter_bg_color)) options.chapter_bg_color = 'transparent';
@@ -1157,46 +1191,87 @@
 
       // Generate the chapter thumbnails based on data in the filtered array
       const chapterThumbs = (player, arr, dim) => {
-          const chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
+          const chapter_col_wrapper = document.querySelector('#chapter_col_wrapper'),
+              chapter_arrow_container = document.querySelectorAll('.chapter_arrow_container'),
               chapter_left_arrow_button = document.querySelector('#chapter_left_arrow'),
               chapter_right_arrow_button = document.querySelector('#chapter_right_arrow'),
-              chapter_col_wrapper = document.querySelector('#chapter_col_wrapper');
+              totalImages = arr.length;
+          let loadedImages = 0,
+              loadPromises = [];
+
+          const updateLoadingBar = () => {
+              const percentage = (loadedImages / totalImages) * 100;
+              document.getElementById('chapter_load_progress').style.width = `${percentage}%`;
+          };
+
           const getVTTData = async () => {
-              let vtt_image_array, url;
-              // Use the player reference to figure out which thumb VTT to use if any
-              url = await filterVTTUrl(player);
-              // Fetch the VTT fle based on plyer reference
-              vtt_data = await fetchVTTFile(url);
-              // Parse the VTT into array
-              vtt_image_array = parseVTT(vtt_data);
-              // Check if dimensions are present in the plugin config JSON
-              if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) dim.thumbnail_w = '144';
-              // Loop through and build array
+              const url = await filterVTTUrl(player);
+              const vtt_data = await fetchVTTFile(url);
+              const vtt_image_array = parseVTT(vtt_data);
+
+              if (!dim.thumbnail_w || !/^\d+$/.test(dim.thumbnail_w)) {
+                  dim.thumbnail_w = '144'; // Default width if not specified or invalid
+              }
+
               for (let i = 0; i < arr.length; i++) {
-                  let chapter_col = document.createElement('div');
-                  chapter_col.classList.add('chapter_col');
-                  let vtt_img_src = 0;
-                  vtt_img_src = matchVTTTime(url, arr[i].time, vtt_image_array);
-                  chapter_col.innerHTML = `
-                      <div class="chapter_anchor">
-                          <img class="chapter_thumbnail" src="${vtt_img_src}" style="width: ${dim.thumbnail_w}px;">
-                          <div class="chapter_details">
+                  const chapter_col = document.createElement('div');
+                  chapter_col.classList.add('chapter_col', 'hidden');
+                  const vtt_img_src = matchVTTTime(url, arr[i].time, vtt_image_array);
+                  
+                  // Create and append the chapter thumbnail image
+                  const imgElement = document.createElement('img');
+                  imgElement.classList.add('chapter_thumbnail');
+                  imgElement.style.width = `${dim.thumbnail_w}px`;
+                  imgElement.src = vtt_img_src;
+
+                  // Create chapter details
+                  const chapterDetailsHTML = `
+                      <div class="chapter_details">
                           <div class="chapter_time">${convertTime(arr[i].time)}</div>
-                              <h4 class="chapter_description">${arr[i].name}</h4>
-                          </div>
+                          <h4 class="chapter_description">${arr[i].name}</h4>
                       </div>
                   `;
+
+                  // Create the chapter anchor and append elements
+                  const chapter_anchor = document.createElement('div');
+                  chapter_anchor.classList.add('chapter_anchor');
+                  chapter_anchor.appendChild(imgElement);
+                  chapter_anchor.innerHTML += chapterDetailsHTML;
+                  chapter_col.appendChild(chapter_anchor);
                   chapter_col_wrapper.appendChild(chapter_col);
-                  let chapter_anchor = document.querySelectorAll('.chapter_anchor');
-                  // Adding event listener on chapters for each video cue point
-                  chapter_anchor[i].addEventListener('click', function(){
+
+                  let imgPromise = new Promise((resolve, reject) => {
+                      imgElement.onload = () => {
+                          loadedImages++;
+                          updateLoadingBar();
+                          resolve();
+                      };
+                      imgElement.onerror = () => {
+                          console.error("Failed to load image", imgElement.src);
+                          reject(new Error(`Failed to load image: ${imgElement.src}`));
+                      };
+                  });
+                  loadPromises.push(imgPromise);
+
+                  chapter_anchor.addEventListener('click', function(){
                       player.currentTime(arr[i].time);
                       player.play();
                   });
               }
-          }
+
+              Promise.all(loadPromises).then(() => {
+                  let chapter_cols = document.querySelectorAll('.chapter_col');
+                  chapter_cols.forEach(col => {
+                      col.classList.remove('hidden');
+                  });
+                  document.getElementById('chapter_load_container').style.display = 'none';
+              }).catch(error => {
+                  console.error("An error occurred loading one or more images", error);
+              });
+          };
+
           getVTTData();
-          // Add event listener to the arrpow buttons
+          // Add event listener to the arrow buttons
           chapter_left_arrow_button.addEventListener('click', () => checkCarouselOverflow('left'));
           chapter_right_arrow_button.addEventListener('click', () => checkCarouselOverflow('right'));
           if (arr.length <= 5) {
