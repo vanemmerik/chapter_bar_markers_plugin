@@ -509,6 +509,7 @@
   position: relative;
   background-color: var(--chapter-color);
   top: 100%;
+  min-height: 130px;
 }
 
 #chapter_load_container {
