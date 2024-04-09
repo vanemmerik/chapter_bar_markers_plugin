@@ -290,7 +290,9 @@ const chapterThumbContainer = (options) => {
     chapterContainer.id = 'vjs-chapter-container';
     chapterContainer.innerHTML = `
         <div id="chapter_load_container">
-            <div id="chapter_load_progress"></div>
+            <div id="chapter_load_wrapper">
+                <div id="chapter_load_progress"></div>
+            </div>
             <p id="chapter_load_text">Loading:</p>
         </div>
         <div id="chapter_title_container">
@@ -469,7 +471,7 @@ const chapterThumbs = (player, arr, dim) => {
             chapter_cols.forEach(col => {
                 col.classList.remove('hidden');
             });
-            document.getElementById('chapter_load_container').style.display = 'none';
+                document.getElementById('chapter_load_container').style.display = 'none';
         }).catch(error => {
             console.error("An error occurred loading one or more images", error);
         });
