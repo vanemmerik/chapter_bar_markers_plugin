@@ -748,8 +748,16 @@
         var myPlayer = this;
         myPlayer.cuePointChaptersPlugin(options);
       });
+      
+      // *** *** *** *** Adding support for video_id query param to load alternative if present *** *** *** ***
+
+      const videoIdInput = document.getElementById("video_id"),
+              query_param = window.location.search,
+              url_param = new URLSearchParams(query_param),
+              video_id_param = url_param.get('video_id');
+      if (video_id_param) videoIdInput.value = video_id_param;
+
       const loadPlayerVideo = () => {
-        const videoIdInput = document.getElementById("video_id");
         // Check for a video value
         if (videoIdInput.value === '') {
           videoIdInput.placeholder = 'Please add video ID';
