@@ -18,7 +18,7 @@ The plugin supports Video Cloud cue points, timestamps in the long description a
 
 The plugin combines all available chapter sources. At matching timestamps, Video Cloud CODE/TEXT cue points take priority, followed by long-description timestamps, then native chapter tracks.\
 Unlike other implementations of chaptering there is no need for the admin to add an index or marker at `00:00` of the video.\
-\
+
 #### Compatibility and validation
 
 The original implementation was tested against Brightcove Player versions 7.2.* and 6.67.*, with limited browser testing on Firefox 110.0.1, Chrome 111.0.5563.64 and Safari 16.3. These results predate native chapter-track support.
