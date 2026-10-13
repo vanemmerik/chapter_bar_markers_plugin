@@ -508,7 +508,11 @@
   font-family: "PP Agrandir","Articulat CF",Montserrat,Arial,Helvetica,sans-serif;
   position: relative;
   background-color: var(--chapter-color);
-  top: 100%;
+  top: auto;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  clear: both;
   min-height: 130px;
 }
 
@@ -664,4 +668,41 @@
   color: #065FD4;
   padding-left: 2px;
   font-size: .9em;
+}
+/* The Brightcove preview uses an absolute player inside a ratio-padding wrapper.
+   A sibling carousel increases that wrapper's height, stretching the player over it.
+   Apply this correction only to wrappers containing this plugin's carousel. */
+.container:has(> .video-js + #vjs-chapter-container) {
+  padding-top: 0 !important;
+  height: auto !important;
+}
+
+.container > .video-js:has(+ #vjs-chapter-container) {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  padding-top: 0 !important;
+  aspect-ratio: 16 / 9;
+}
+
+/* Match the updated plugin's percentage-based markers to the seek bar. */
+.video-js .vjs-progress-holder > .vjs-cue-control {
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.video-js .vjs-cue-control > .vjs-cue-marker {
+  pointer-events: auto;
+}
+
+#vjs-chapter-container .chapter_col {
+  flex-shrink: 0;
+}
+
+#vjs-chapter-container .chapter_anchor:focus-visible {
+  outline: 2px solid #065fd4;
+  outline-offset: 2px;
 }
